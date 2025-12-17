@@ -1,11 +1,15 @@
 const nodemailer = require("nodemailer");
 
+// Gmail configuration - use environment variables with fallbacks
+const GMAIL_USER = process.env.GMAIL_USER || "Petwego747@gmail.com";
+const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD || "ydss yjxf ztta rcay";
+
 // Create reusable transporter object using Gmail SMTP
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "Petwego747@gmail.com",
-    pass: "ydss yjxf ztta rcay" // App password from Google Account
+    user: GMAIL_USER,
+    pass: GMAIL_APP_PASSWORD
   }
 });
 
@@ -13,7 +17,7 @@ const transporter = nodemailer.createTransport({
 async function sendMail(to, subject, text, html = null) {
   try {
     const mailOptions = {
-      from: `"PetHub 🐾" <Petwego747@gmail.com>`,
+      from: `"PetHub 🐾" <${GMAIL_USER}>`,
       to,
       subject,
       text,

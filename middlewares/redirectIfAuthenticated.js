@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const SECRET_KEY = "rehan8080";
+const SECRET_KEY = process.env.JWT_SECRET || "rehan8080";
 
 function redirectIfAuthenticated(req, res, next) {
   const token = req.cookies && req.cookies.token;

@@ -2,15 +2,15 @@ const admin = require('firebase-admin');
 const path = require('path');
 const fs = require('fs');
 
-// Firebase client-style config (for reference; admin uses service account)
+// Firebase client-style config - use environment variables with fallbacks
 const firebaseConfig = {
-  apiKey: "AIzaSyDyL_aadGzyozNjU6QKoRgHjJ_jxlwWJxU",
-  authDomain: "maple-educators-app.firebaseapp.com",
-  projectId: "maple-educators-app",
-  storageBucket: "maple-educators-app.firebasestorage.app",
-  messagingSenderId: "782200920015",
-  appId: "1:782200920015:web:7c87d1cb8868e7e02024ba",
-  measurementId: "G-E4TB3CLH62"
+  apiKey: process.env.FIREBASE_API_KEY || "AIzaSyDyL_aadGzyozNjU6QKoRgHjJ_jxlwWJxU",
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN || "maple-educators-app.firebaseapp.com",
+  projectId: process.env.FIREBASE_PROJECT_ID || "maple-educators-app",
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "maple-educators-app.firebasestorage.app",
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || "782200920015",
+  appId: process.env.FIREBASE_APP_ID || "1:782200920015:web:7c87d1cb8868e7e02024ba",
+  measurementId: process.env.FIREBASE_MEASUREMENT_ID || "G-E4TB3CLH62"
 };
 
 /**

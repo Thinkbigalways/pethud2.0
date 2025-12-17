@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const { sendMail } = require('../../utils/mailer');
 const { getUserByEmail, getUserByUsername, createUser, updateUser } = require('../../utils/firestoreHelpers');
 
-const SECRET_KEY = 'rehan8080';
+const SECRET_KEY = process.env.JWT_SECRET || 'rehan8080';
 
 function isMobile(req) {
   const ua = req.headers['user-agent'] || '';
