@@ -1,0 +1,85 @@
+<%- include('../bootstrap/header') %>
+<%- include('../bootstrap/header-nav', { user: user }) %>
+
+<div class="bg-light py-3">
+  <div class="container-fluid">
+    <div class="row g-3">
+      <!-- Ad Images Carousel -->
+      <div class="col-lg-7">
+        <div id="adCarousel" class="carousel slide shadow-sm border" data-bs-ride="carousel">
+          <div class="carousel-inner">
+            <% let images = ad.images && ad.images.length > 0 ? ad.images : ['https://placehold.co/800x600']; %>
+            <% images.forEach((img, index) => { %>
+              <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                <img src="<%= img %>" class="d-block w-100" alt="Ad Image" style="height: 400px; object-fit: cover;">
+              </div>
+            <% }); %>
+          </div>
+          <% if (images.length > 1) { %>
+            <button class="carousel-control-prev" type="button" data-bs-target="#adCarousel" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#adCarousel" data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Next</span>
+            </button>
+          <% } %>
+        </div>
+  
+        <!-- Thumbnails -->
+        <% if (images.length > 1) { %>
+          <div class="mt-3 d-flex gap-2 flex-wrap">
+            <% images.forEach((img, idx) => { %>
+              <img src="<%= img %>" class="thumbnail-img rounded-2 shadow-sm" style="width: 100px; height: 70px; object-fit: cover; cursor: pointer;"
+                   data-bs-target="#adCarousel" data-bs-slide-to="<%= idx %>" <%= idx === 0 ? 'class="active"' : '' %>>
+            <% }); %>
+          </div>
+        <% } %>
+      </div>
+  
+      <!-- Ad Details Card -->
+      <div class="col-lg-5">
+        <div class="card shadow-sm p-3 p-lg-4 h-100">
+          <div class="d-flex flex-column border-bottom pb-3 mb-3">
+            <span class="fw-bold h3"><%- ad.title %></span>
+            <span class="h5">$<%- ad.price %></span>
+            <span class="text-muted small"><small>Listed on <%= new Date(ad.created_at).toLocaleDateString() %></small></span>
+          </div>
+  
+          <div class="d-flex flex-column border-bottom pb-3 mb-3">
+            <span class="fw-bold mb-2">Description</span>
+            <span style="white-space: pre-wrap;"><%- ad.description %></span>
+          </div>
+  
+          <div class="d-flex flex-column border-bottom mb-3 pb-3">
+            <span><i class="fa fa-location-dot me-2"></i><%= ad.location %></span>
+            <span class="small text-muted"><small>Location is approximate</small></span>
+          </div>
+  
+          <div class="d-flex flex-column mb-3">
+            <span class="fw-bold mb-2">Seller Information</span>
+            <div class="d-flex gap-2 align-items-center">
+              <img src="<%= ad.seller_profile_pic %>" class="rounded-circle" alt="Seller" style="height: 40px; width: 40px; object-fit: cover;">
+              <div class="d-flex flex-column">
+                <span class="fw-bold"><%- ad.seller_first_name + ' ' + ad.seller_last_name %></span>
+              </div>
+            </div>
+          </div>
+  
+          <div class="d-flex">
+            <a href="/contact-seller/<%= ad.user_id %>" class="btn btn-primary flex-grow-1">Contact Seller</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .thumbnail-img.active {
+    border: 2px solid #0d6efd;
+  }
+</style>
+
+<%- include('../bootstrap/footer') %>

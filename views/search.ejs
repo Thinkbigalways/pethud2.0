@@ -1,0 +1,78 @@
+<%- include('bootstrap/header') %>
+<%- include('bootstrap/header-nav', { user: user }) %>
+
+<div class="py-3 bg-light">
+  <div class="container-fluid">
+    <div class="row g-4">
+      
+      <!-- LEFT SIDEBAR -->
+      <div class="col-lg-3">
+        <div class="bg-white p-3 rounded shadow-sm sticky-top">
+          <ul class="sidebar nav flex-column">
+            <li class="nav-item"><a class="nav-link <%= filter === 'feeds' ? 'active' : '' %>" href="?fiter=feeds&q=<%= query %>"><i class="fas fa-newspaper me-3"></i>Search in feeds</a></li>
+            <li class="nav-item"><a class="nav-link <%= filter === 'people' ? 'active' : '' %>" href="?fiter=people&q=<%= query %>"><i class="fas fa-user-friends me-3"></i>Search people</a></li>
+            <li class="nav-item mt-2 mb-2 border-top"></li>
+            <li class="nav-item"><a class="nav-link" href="/marketplace"><i class="fas fa-store me-3"></i>Marketplace</a></li>
+            <li class="nav-item mt-2 mb-2 border-top"></li>
+            <li class="nav-item"><a class="nav-link" href="/settings"><i class="fas fa-gear me-3"></i>Settings</a></li>
+            <li class="nav-item"><a class="nav-link" href="/auth/logout"><i class="fas fa-sign-out-alt me-3"></i>Logout</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <!-- MAIN SEARCH AREA -->
+      <div class="col-lg-9">
+        <div class="bg-white p-4 rounded shadow-sm">
+          <!-- Results -->
+          <% if (results && results.length > 0) { %>
+
+            <% if (filter === 'feeds') { %>
+              <% results.forEach(post => { %>
+                <div class="card border-0 shadow-sm mb-3">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                      <img src="<%= post.profile_pic || 'https://placehold.co/40' %>" class="rounded-circle me-2" width="40" height="40" style="object-fit:cover;">
+                      <strong><%= post.username %></strong>
+                    </div>
+                    <p><%= post.content %></p>
+                    <% if (post.media && post.media.length > 0) { %>
+                      <div class="d-flex flex-wrap gap-2">
+                        <% post.media.forEach(url => { %>
+                          <% if(url.match(/\.(mp4|mov|avi)$/i)) { %>
+                            <video src="<%= url %>" controls width="300" class="rounded"></video>
+                          <% } else { %>
+                            <img src="<%= url %>" class="img-fluid rounded" width="300" alt="Post media">
+                          <% } %>
+                        <% }) %>
+                      </div>
+                    <% } %>
+                  </div>
+                </div>
+              <% }) %>
+
+            <% } else if (filter === 'people') { %>
+              <% results.forEach(u => { %>
+                <div class="d-flex align-items-center mb-3">
+                  <a href="/@<%- u.username %>">
+                    <img src="<%= u.profile_pic || 'https://placehold.co/40' %>" class="rounded-circle me-3" width="50" height="50" style="object-fit:cover;">
+                  </a>
+                  <div>
+                    <a class="mb-0 fw-bold text-decoration-none text-dark" href="/@<%- u.username %>"><%= u.first_name %> <%= u.last_name %></a>
+                    <p class="text-muted small mb-0">@<%= u.username %></p>
+                  </div>
+                </div>
+              <% }) %>
+            <% } %>
+
+          <% } else { %>
+            <p class="text-center text-muted">No results found for "<%= query %>"</p>
+          <% } %>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<%- include('bootstrap/footer') %>

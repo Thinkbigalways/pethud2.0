@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= title || "PetHundl" %></title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.7/yeti/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" referrerpolicy="no-referrer" />
+  </head>
+
+<style>
+.sidebar .nav-link {
+  transition: 0.3s;
+  border-radius: 5px;
+  padding: 10px 15px;
+  color: rgba(var(--bs-dark-rgb), 1) !important; /* use dark text */
+}
+
+.sidebar .nav-link:hover {
+  background: rgba(var(--bs-light-rgb), 1); /* light background */
+  color: rgba(var(--bs-primary-rgb), 1) !important; /* bootstrap primary */
+}
+
+.sidebar .nav-link.active {
+  background: rgba(var(--bs-primary-rgb), 1);
+  color: #fff !important;
+  font-weight: bold;
+}
+
+.sidebar .nav-link i {
+  transition: 0.3s;
+}
+
+.sidebar .nav-link:hover i { color: rgba(var(--bs-primary-rgb), 1); }
+.sidebar .nav-link.active i { color: #fff; }
+</style>
+
+<body class="bg-light d-flex flex-column min-vh-100">

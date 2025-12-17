@@ -1,0 +1,112 @@
+<%- include('bootstrap/header') %>
+<%- include('bootstrap/header-nav', { user: user }) %>
+
+<div class="py-3 bg-light">
+  <div class="container-fluid">
+    <div class="row g-4">
+      
+      <!-- LEFT SIDEBAR -->
+      <div class="col-lg-3">
+        <div class="bg-white p-3 rounded shadow-sm sticky-top">
+          <ul class="sidebar nav flex-column">
+            <li class="nav-item"><a class="nav-link" href="/"><i class="fas fa-home me-3"></i>Feeds</a></li>
+            <li class="nav-item"><a class="nav-link" href="/@<%- user.username %>#posts"><i class="fas fa-sticky-note me-3"></i>My posts</a></li>
+            <li class="nav-item"><a class="nav-link" href="/@<%- user.username %>#friends"><i class="fas fa-user-friends me-3"></i>My friends</a></li>
+            <li class="nav-item"><a class="nav-link" href="/marketplace"><i class="fas fa-store me-3"></i>Marketplace</a></li>
+            <li class="nav-item mt-2 mb-2 border-top"></li>
+            <li class="nav-item"><a class="nav-link" href="/settings"><i class="fas fa-gear me-3"></i>Settings</a></li>
+            <li class="nav-item"><a class="nav-link" href="/auth/logout"><i class="fas fa-sign-out-alt me-3"></i>Logout</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <!-- Notifications -->
+      <div class="col-lg-9">
+        <div class="bg-white p-4 rounded shadow-sm">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold">Notifications</h4>
+            <button id="markAllRead" class="btn btn-sm btn-primary">Mark all as read</button>
+          </div>
+
+          <ul class="list-group" id="notificationsList">
+            <% if (notifications.length === 0) { %>
+              <li class="list-group-item text-center text-muted">No notifications yet</li>
+            <% } else { %>
+              <% notifications.forEach(notif => { %>
+                <li class="list-group-item d-flex align-items-start <%= !notif.is_read ? 'bg-light' : '' %> py-3" 
+                  data-id="<%= notif.id %>" 
+                  data-username="<%= notif.username %>" 
+                  style="cursor: pointer;">
+                  <img src="<%= notif.profile_pic || '/images/default-avatar.png' %>" alt="Profile" class="rounded-circle me-3" style="width:40px;height:40px;object-fit:cover;">
+                  <div class="flex-grow-1">
+                    <div class="d-flex justify-content-between align-items-start">
+                      <div class="d-flex flex-column justify-content-center">
+                        <% if (notif.type === 'like') { %>
+                          <span><span class="fw-bold">@<%= notif.username %></span> liked your post</span>
+                        <% } else if (notif.type === 'comment') { %>
+                          <span><span class="fw-bold">@<%= notif.username %></span> commented: "<%= notif.content %>"</span>
+                        <% } else if (notif.type === 'follow') { %>
+                          <strong><%= notif.username %></strong> started following you
+                        <% } else if (notif.type === 'friend_request') { %>
+                          <span><span class="fw-bold">@<%= notif.username %></span> sent you a friend request</span>
+                        <% } else { %>
+                          <span><span class="fw-bold">@<%= notif.username %></span> <%= notif.content %></span>
+                        <% } %>
+                        <span class="text-muted small"><%= new Date(notif.created_at).toLocaleString() %></span>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              <% }) %>
+            <% } %>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<%- include('bootstrap/footer') %>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  // ===== Mark all notifications as read =====
+  document.getElementById('markAllRead').addEventListener('click', async () => {
+    try {
+      const res = await fetch('/notifications/read-all', { method: 'POST', headers: { 'Content-Type': 'application/json' }});
+      const data = await res.json();
+      if (data.success) {
+        document.querySelectorAll('#notificationsList li').forEach(li => li.classList.remove('bg-light'));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  });
+
+  // ===== Click notification → mark read + redirect =====
+  document.querySelectorAll('#notificationsList li').forEach(li => {
+    li.addEventListener('click', async () => {
+      const notifId = li.getAttribute('data-id');
+      const username = li.getAttribute('data-username'); // <-- we'll add this
+      if (!username) return;
+
+      try {
+        // Mark notification as read
+        await fetch('/notifications/read', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ notificationId: notifId })
+        });
+
+        // Redirect to profile
+        window.location.href = `/@${username}`;
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  });
+
+});
+</script>

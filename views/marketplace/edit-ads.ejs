@@ -1,0 +1,112 @@
+<%- include('../bootstrap/header') %>
+<%- include('../bootstrap/header-nav', { user: user }) %>
+
+<div class="bg-light py-3">
+    <div class="container-fluid">
+        <div class="row g-4">
+
+        <!-- SIDEBAR -->
+        <div class="col-lg-3">
+            <!-- Sidebar for Desktop -->
+            <div class="sidebar bg-white p-3 rounded shadow-sm d-none d-lg-block">
+            <ul class="nav flex-column">
+                <li class="nav-item"><a class="nav-link" href="/"><i class="fas fa-home me-3"></i>Feeds</a></li>
+                <li class="nav-item"><a class="nav-link" href="/@<%- user.username %>#posts"><i class="fas fa-sticky-note me-3"></i>My posts</a></li>
+                <li class="nav-item"><a class="nav-link" href="/@<%- user.username %>#friends"><i class="fas fa-user-friends me-3"></i>My friends</a></li>
+                <li class="nav-item mt-2 mb-2 border-top"></li>
+                <li class="nav-item"><a class="nav-link active" href="/marketplace"><i class="fas fa-store me-3"></i>Marketplace</a></li>
+                <li class="nav-item"><a class="nav-link" href="/marketplace/add-ads"><i class="fas fa-plus me-3"></i>Post An Ad</a></li>
+                <li class="nav-item"><a class="nav-link" href="/marketplace/my-ads"><i class="fas fa-list me-3"></i>My Ads</a></li>
+                <li class="nav-item mt-2 mb-2 border-top"></li>
+                <li class="nav-item"><a class="nav-link" href="/settings"><i class="fas fa-gear me-3"></i>Settings</a></li>
+                <li class="nav-item"><a class="nav-link" href="/auth/logout"><i class="fas fa-sign-out-alt me-3"></i>Logout</a></li>
+            </ul>
+            </div>
+
+            <!-- Dropdown for Mobile -->
+            <div class="dropdown d-block d-lg-none">
+            <button class="btn btn-dark w-100 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Menu
+            </button>
+            <ul class="dropdown-menu w-100">
+                <li><a class="dropdown-item" href="/"><i class="fas fa-home me-3"></i>Feeds</a></li>
+                <li><a class="dropdown-item" href="/@<%- user.username %>#posts"><i class="fas fa-sticky-note me-3"></i>My posts</a></li>
+                <li><a class="dropdown-item" href="/@<%- user.username %>#friends"><i class="fas fa-user-friends me-3"></i>My friends</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item active" href="/marketplace"><i class="fas fa-store me-3"></i>Marketplace</a></li>
+                <li><a class="dropdown-item" href="/marketplace/add-ads"><i class="fas fa-plus me-3"></i>Post An Ad</a></li>
+                <li><a class="dropdown-item" href="/marketplace/my-ads"><i class="fas fa-list me-3"></i>My Ads</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="/settings"><i class="fas fa-gear me-3"></i>Settings</a></li>
+                <li><a class="dropdown-item" href="/auth/logout"><i class="fas fa-sign-out-alt me-3"></i>Logout</a></li>
+            </ul>
+            </div>
+        </div>
+
+        <!-- Edit ADS FORM -->
+        <div class="col-lg-9">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h4 class="mb-0 fw-bold"><i class="fas fa-edit me-2 text-primary"></i>Edit Ad</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Success / Error -->
+                    <% if (typeof success !== 'undefined' && success) { %>
+                    <div class="alert alert-success"><i class="fas fa-check-circle me-2"></i><%= success %></div>
+                    <% } %>
+                    <% if (typeof error !== 'undefined' && error) { %>
+                    <div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i><%= error %></div>
+                    <% } %>
+                    <form method="POST" action="/marketplace/edit-ads/<%= ad.id %>" enctype="multipart/form-data">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="title" class="form-label fw-bold">Title <span class="text-danger">*</span></label>
+                                <input type="text" id="title" name="title" class="form-control" value="<%= ad.title %>" required>
+                            </div>
+                            <div class="col-12">
+                                <label for="description" class="form-label fw-bold">Description</label>
+                                <textarea id="description" name="description" class="form-control" rows="4"><%= ad.description %></textarea>
+                            </div>
+                            <div class="col-4">
+                                <label for="price" class="form-label fw-bold">Price ($) <span class="text-danger">*</span></label>
+                                <input type="tel" id="price" name="price" class="form-control" value="<%= ad.price %>" placeholder="14.99" required oninput="this.value=this.value.replace(/[^0-9.]/g,'').replace(/(\..*?)\./g,'$1')">
+                            </div>
+                            <div class="col-4">
+                                <label for="category" class="form-label fw-bold">Category</label>
+                                <input type="text" id="category" name="category" class="form-control" value="<%= ad.category %>">
+                            </div>
+                            <div class="col-4">
+                                <label for="location" class="form-label fw-bold">Location</label>
+                                <input type="text" id="location" name="location" class="form-control" value="<%= ad.location %>">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Existing Images</label>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <% images.forEach(img => { %>
+                                    <div class="position-relative">
+                                        <img src="<%= img.image %>" class="rounded" style="width:100px; height:100px; object-fit:cover;">
+                                        <div class="form-check position-absolute top-0 end-0">
+                                        <input class="form-check-input" type="checkbox" name="removeImages" value="<%= img.id %>">
+                                        </div>
+                                    </div>
+                                    <% }) %>
+                                </div>
+                                <div class="form-text">Check images to remove</div>
+                            </div>
+                            <div class="col-12">
+                                <label for="newImages" class="form-label fw-bold">Add New Images</label>
+                                <input type="file" id="newImages" name="images" class="form-control" accept="image/*" multiple>
+                            </div>
+                            <div class="col-12 text-end">
+                                <button type="submit" class="btn btn-dark px-4"><i class="fa fa-pencil-alt me-2"></i> Update Ad</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../bootstrap/footer') %>

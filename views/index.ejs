@@ -1,0 +1,165 @@
+<%- include('bootstrap/header') %>
+<%- include('bootstrap/header-nav', { user: user }) %>
+
+<div class="py-3 bg-light">
+<div class="container-fluid">
+  <div class="row g-4">
+    
+    <!-- LEFT SIDEBAR -->
+    <div class="col-lg-3 d-none d-lg-block">
+      <div class="bg-white p-3 rounded shadow-sm sticky-top" style="top: 82px;">
+        <ul class="sidebar nav flex-column">
+          <li class="nav-item"><a class="nav-link active" href="/"><i class="fas fa-home me-3"></i>Feeds</a></li>
+          <li class="nav-item"><a class="nav-link" href="/@<%- user.username %>#posts"><i class="fas fa-sticky-note me-3"></i>My posts</a></li>
+          <li class="nav-item"><a class="nav-link" href="/@<%- user.username %>#friends"><i class="fas fa-user-friends me-3"></i>My friends</a></li>
+          <li class="nav-item"><a class="nav-link" href="/marketplace"><i class="fas fa-store me-3"></i>Marketplace</a></li>
+          <li class="nav-item mt-2 mb-2 border-top"></li>
+          <li class="nav-item"><a class="nav-link" href="/settings"><i class="fas fa-gear me-3"></i>Settings</a></li>
+          <li class="nav-item"><a class="nav-link" href="/auth/logout"><i class="fas fa-sign-out-alt me-3"></i>Logout</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <!-- MAIN FEED -->
+    <div class="col-lg-6">
+
+      <!-- Create Post -->
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+          <div class="d-flex mb-3">
+            <img src="<%= user.profile_pic || '/images/paw.jpg' %>" class="rounded-circle border me-2" alt="Profile" style="width:40px; height:40px; object-fit:cover;">
+            <div class="form-control rounded-pill" data-bs-toggle="modal" data-bs-target="#createPostModal" style="cursor:pointer;"><span class="text-muted">What's on your mind?</span></div>
+          </div>
+          <div class="d-flex justify-content-around">
+            <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#createPostModal"><i class="fas fa-image text-success me-2"></i> Photo/Video</button>
+            <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#createPostModal"><i class="fas fa-smile text-warning me-2"></i> Feeling</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Posts -->
+      <div id="post-container">
+        <%- include('partials/posts', { posts: posts, user: user }) %>
+      </div>
+      <div id="loading" class="text-center my-3" style="display:none;">
+        <div class="spinner-border text-dark"></div>
+      </div>
+
+    </div>
+    
+    <!-- RIGHT SIDEBAR -->
+    <div class="col-lg-3 d-none d-lg-block">
+      <div class="sidebar bg-white p-3 rounded shadow-sm mb-3">
+        <h6 class="fw-bold">Suggestions</h6>
+        <% if (suggestions && suggestions.length > 0) { %>
+          <% suggestions.forEach(s => { %>
+            <div class="d-flex align-items-center mb-2">
+              <a href="/@<%- s.username %>">
+                <img src="<%= s.profile_pic || '/images/paw.jpg' %>" 
+                    class="rounded-circle border me-2" 
+                    alt="<%= s.username %>" 
+                    style="width:40px; height:40px; object-fit:cover;">
+              </a>
+              <div class="d-flex flex-column">
+                <a href="/@<%- s.username %>" class="text-decoration-none fw-bold small text-dark">
+                  @<%= s.username %>
+                </a>
+                <span class="text-muted small" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">
+                  <small><%= s.bio || "🐾 Pet Lover" %></small>
+                </span>
+              </div>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <p class="text-muted small">No suggestions available</p>
+        <% } %>
+      </div>
+
+      <div class="sidebar bg-white p-3 rounded shadow-sm">
+        <h6 class="fw-bold">Trending</h6>
+        <p class="mb-1">#pet</p>
+        <p class="mb-1">#cat</p>
+        <p class="mb-1">#dog_lover</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- Create Post Modal -->
+<div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="createPostModalLabel">Create Post</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <!-- Modal Body -->
+      <form action="/posts/create" method="POST" enctype="multipart/form-data">
+        <div class="modal-body">
+          <div class="d-flex mb-3">
+            <img src="<%= user.profile_pic || '/images/paw.jpg' %>" class="rounded-circle border me-2" alt="Profile" style="width:40px; height:40px; object-fit:cover;">
+            <div>
+              <strong><%= user.first_name %> <%= user.last_name %></strong>
+              <div class="small text-muted">Public <i class="fas fa-caret-down"></i></div>
+            </div>
+          </div>
+
+          <!-- Post Text -->
+          <textarea name="content" class="form-control mb-3" rows="4" placeholder="What's on your mind?" required></textarea>
+
+          <!-- Media Upload -->
+          <div class="border rounded p-3 mt-2 text-center">
+            <label class="mb-0" style="cursor:pointer;">
+              <i class="fas fa-image text-success me-2"></i>
+              <span>Add Photos/Videos</span>
+              <input type="file" name="media" accept="image/*,video/*" multiple class="d-none">
+            </label>
+          </div>
+
+          <!-- Optional preview area -->
+          <div id="mediaPreview" class="mt-3 d-flex flex-wrap gap-2"></div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-dark px-4">Post</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Optional: live preview of selected images/videos
+  const fileInput = document.querySelector('input[name="media"]');
+  const preview = document.getElementById('mediaPreview');
+
+  fileInput.addEventListener('change', () => {
+    preview.innerHTML = '';
+    Array.from(fileInput.files).forEach(file => {
+      const url = URL.createObjectURL(file);
+      let element;
+      if(file.type.startsWith('video/')){
+        element = document.createElement('video');
+        element.src = url;
+        element.controls = true;
+        element.width = 100;
+        element.classList.add('rounded');
+      } else {
+        element = document.createElement('img');
+        element.src = url;
+        element.width = 100;
+        element.classList.add('rounded');
+      }
+      preview.appendChild(element);
+    });
+  });
+</script>
+
+<%- include('bootstrap/footer') %>

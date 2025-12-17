@@ -1,0 +1,205 @@
+<%- include('../bootstrap/header') %>
+<%- include('../bootstrap/header-nav', { user: user }) %>
+
+<div class="bg-light py-3">
+  <div class="container-fluid">
+    <div class="row g-4">
+
+      <!-- SIDEBAR -->
+      <div class="col-lg-3">
+        <!-- Sidebar for Desktop -->
+        <div class="sidebar bg-white p-3 rounded shadow-sm d-none d-lg-block">
+          <ul class="nav flex-column">
+            <li class="nav-item"><a class="nav-link" href="/"><i class="fas fa-home me-3"></i>Feeds</a></li>
+            <li class="nav-item"><a class="nav-link" href="/@<%- user.username %>#posts"><i class="fas fa-sticky-note me-3"></i>My posts</a></li>
+            <li class="nav-item"><a class="nav-link" href="/@<%- user.username %>#friends"><i class="fas fa-user-friends me-3"></i>My friends</a></li>
+            <li class="nav-item mt-2 mb-2 border-top"></li>
+            <li class="nav-item"><a class="nav-link active" href="/marketplace"><i class="fas fa-store me-3"></i>Marketplace</a></li>
+            <li class="nav-item"><a class="nav-link" href="/marketplace/add-ads"><i class="fas fa-plus me-3"></i>Post An Ad</a></li>
+            <li class="nav-item"><a class="nav-link" href="/marketplace/my-ads"><i class="fas fa-list me-3"></i>My Ads</a></li>
+            <li class="nav-item mt-2 mb-2 border-top"></li>
+            <li class="nav-item"><a class="nav-link" href="/settings"><i class="fas fa-gear me-3"></i>Settings</a></li>
+            <li class="nav-item"><a class="nav-link" href="/auth/logout"><i class="fas fa-sign-out-alt me-3"></i>Logout</a></li>
+          </ul>
+        </div>
+
+        <!-- Dropdown for Mobile -->
+        <div class="dropdown d-block d-lg-none">
+          <button class="btn btn-dark w-100 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Menu
+          </button>
+          <ul class="dropdown-menu w-100">
+            <li><a class="dropdown-item" href="/"><i class="fas fa-home me-3"></i>Feeds</a></li>
+            <li><a class="dropdown-item" href="/@<%- user.username %>#posts"><i class="fas fa-sticky-note me-3"></i>My posts</a></li>
+            <li><a class="dropdown-item" href="/@<%- user.username %>#friends"><i class="fas fa-user-friends me-3"></i>My friends</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item active" href="/marketplace"><i class="fas fa-store me-3"></i>Marketplace</a></li>
+            <li><a class="dropdown-item" href="/marketplace/add-ads"><i class="fas fa-plus me-3"></i>Post An Ad</a></li>
+            <li><a class="dropdown-item" href="/marketplace/my-ads"><i class="fas fa-list me-3"></i>My Ads</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="/settings"><i class="fas fa-gear me-3"></i>Settings</a></li>
+            <li><a class="dropdown-item" href="/auth/logout"><i class="fas fa-sign-out-alt me-3"></i>Logout</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- PRODUCTS -->
+      <div class="col-lg-9">
+
+        <!-- Search & Filter Row -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
+          <h4 class="fw-bold mb-2 mb-md-0">Marketplace</h4>
+          <div class="d-flex flex-column flex-sm-row gap-2 w-100 w-md-auto">
+            <input type="text" id="search" class="form-control form-control-sm" placeholder="Search products...">
+            <select id="sort" class="form-select form-select-sm">
+              <option value="">Sort by</option>
+              <option value="1">Price: Low to High</option>
+              <option value="2">Price: High to Low</option>
+              <option value="3">Newest</option>
+            </select>
+          </div>
+        </div>
+
+
+        <!-- Product Grid -->
+        <div class="row g-4" id="product-grid">
+          <!-- Products will be injected here -->
+        </div>
+
+        <!-- Pagination -->
+        <nav>
+          <ul class="pagination justify-content-center mt-4" id="pagination"></ul>
+        </nav>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const searchInput = document.getElementById('search');
+  const sortSelect = document.getElementById('sort');
+  const productGrid = document.getElementById('product-grid');
+  const pagination = document.getElementById('pagination');
+  let currentPage = 1;
+  const limit = 6; // same as server limit
+
+async function fetchProducts(page = 1) {
+  currentPage = page;
+  const search = searchInput.value;
+  const sort = sortSelect.value;
+
+  try {
+    const res = await fetch(`/marketplace/filter?search=${encodeURIComponent(search)}&sort=${sort}&page=${page}&limit=${limit}`);
+    const data = await res.json();
+
+    // Log data for debugging
+    console.log('Fetched data:', data);
+
+    // Render ads
+    productGrid.innerHTML = '';
+    if (!data.ads || data.ads.length === 0) {
+      productGrid.innerHTML = '<div class="col-12 text-center py-5"><h5 class="text-muted">No products found</h5></div>';
+    } else {
+      data.ads.forEach(product => {
+        const div = document.createElement('div');
+        div.classList.add('col-md-4', 'product-item');
+
+        // Build carousel for multiple images
+        const images = product.images && product.images.length ? product.images : ['https://placehold.co/300x180'];
+        const carouselId = `carousel-${product.id}`;
+        let carouselInner = '';
+        images.forEach((img, index) => {
+          carouselInner += `
+            <div class="carousel-item ${index === 0 ? 'active' : ''}">
+              <a href="/marketplace/view-ad/${product.id}">
+                <img src="${img}" class="d-block w-100" alt="${product.title}" style="height: 200px; width: 200px; object-fit: cover;">
+              </a>
+            </div>
+          `;
+        });
+
+        div.innerHTML = `
+          <div class="product-card card shadow-sm">
+            <div id="${carouselId}" class="carousel slide" data-bs-ride="carousel">
+              <div class="carousel-inner">
+                ${carouselInner}
+              </div>
+              ${images.length > 1 ? `
+              <button class="carousel-control-prev" type="button" data-bs-target="#${carouselId}" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon"></span>
+              </button>
+              <button class="carousel-control-next" type="button" data-bs-target="#${carouselId}" data-bs-slide="next">
+                <span class="carousel-control-next-icon"></span>
+              </button>` : ''}
+            </div>
+            <div class="card-body">
+              <div class="d-flex flex-column">
+                <a class="text-decoration-none h5 fw-bold" href="/marketplace/view-ad/${product.id}">${product.title}</a>
+                <a class="text-decoration-none text-muted text-dark" href="/marketplace/view-ad/${product.id}">$${product.price}</a>
+                <div class="form-text">${product.location || ''}</div>
+              </div>
+            </div>
+          </div>
+        `;
+        productGrid.appendChild(div);
+      });
+    }
+
+    // Render pagination
+    pagination.innerHTML = '';
+
+    // Ensure totalPages is a valid number
+    const totalPages = data.totalPages && Number.isInteger(data.totalPages) && data.totalPages > 0 ? data.totalPages : 1;
+
+    // Previous Button
+    const prevLi = document.createElement('li');
+    prevLi.classList.add('page-item');
+    if (currentPage === 1) prevLi.classList.add('disabled');
+    prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>`;
+    prevLi.addEventListener('click', e => {
+      e.preventDefault();
+      if (currentPage > 1) fetchProducts(currentPage - 1);
+    });
+    pagination.appendChild(prevLi);
+
+    // Page numbers
+    if (totalPages > 1) {
+      for (let i = 1; i <= totalPages; i++) {
+        const li = document.createElement('li');
+        li.classList.add('page-item');
+        if (i === currentPage) li.classList.add('active');
+        li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+        li.addEventListener('click', e => {
+          e.preventDefault();
+          fetchProducts(i);
+        });
+        pagination.appendChild(li);
+      }
+    }
+
+    // Next Button
+    const nextLi = document.createElement('li');
+    nextLi.classList.add('page-item');
+    if (currentPage === totalPages) nextLi.classList.add('disabled');
+    nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>`;
+    nextLi.addEventListener('click', e => {
+      e.preventDefault();
+      if (currentPage < totalPages) fetchProducts(currentPage + 1);
+    });
+    pagination.appendChild(nextLi);
+
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    productGrid.innerHTML = '<div class="col-12 text-center py-5"><h5 class="text-danger">Error loading products</h5></div>';
+  }
+}
+  // Initial load
+  fetchProducts();
+
+  // Event listeners
+  searchInput.addEventListener('input', () => fetchProducts(1));
+  sortSelect.addEventListener('change', () => fetchProducts(1));
+</script>
+
+<%- include('../bootstrap/footer') %>

@@ -1,0 +1,221 @@
+<nav class="navbar navbar-expand-lg sticky-top bg-white shadow-sm">
+  <div class="container-fluid">
+    
+    <!-- Brand -->
+    <a class="navbar-brand d-flex align-items-center" href="/">
+      <img src="/images/logo-black.svg" alt="Pethudl" height="40" />
+      <span class="fw-bold ms-2">Pethudl</span>
+    </a>
+
+    <!-- Search bar (Facebook style) -->
+    <% if (user) { %>
+      <form class="d-none d-lg-flex mx-auto w-50 position-relative" action="/search" method="GET">
+        <input 
+          type="text" 
+          name="q" 
+          class="form-control rounded-pill ps-4 pe-5 search-input" 
+          placeholder="Search Pethudl..."
+          value="<%= typeof query !== 'undefined' ? query : '' %>">
+        <button type="submit" class="btn search-btn position-absolute end-0 top-0 me-1 border-0 bg-transparent">
+          <i class="fas fa-search text-muted"></i>
+        </button>
+      </form>
+    <% } %>
+
+    <!-- Right side -->
+    <div class="d-flex gap-2 ms-auto align-items-center">
+      
+      <% if (!user) { %>
+        <a href="/auth/login" class="btn btn-dark px-4 py-2">Login</a>
+        <a href="/auth/register" class="btn btn-secondary px-4 py-2">Register</a>
+      <% } else { %>
+
+        <a class="btn btn-light rounded-circle position-relative shadow-sm" href="/marketplace" style="height: 40px; width: 40px;"><i class="fa fa-store"></i></a>
+
+        <!-- Notifications -->
+        <div class="dropdown">
+          <a class="btn btn-light rounded-circle position-relative shadow-sm notif-btn" 
+             href="#" id="notificationDropdown" role="button" 
+             data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fa fa-bell"></i>
+            <span id="notificationBadge" 
+                  class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger d-none">
+              0
+            </span>
+          </a>
+
+          <ul id="notificationDropdownMenu" 
+              class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 notif-menu"
+              aria-labelledby="notificationDropdown">
+            
+            <li class="dropdown-header fw-bold text-dark">Notifications</li>
+            <li><hr class="dropdown-divider"></li>
+
+            <!-- Notifications will be injected here -->
+            <div id="notificationItems"></div>
+
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <a class="dropdown-item text-center fw-bold" href="/notifications">
+                View All Notifications
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Profile -->
+        <div class="dropdown">
+          <a class="d-flex align-items-center text-decoration-none shadow-sm rounded-circle" 
+             href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="<%= user.profile_pic || '/images/logo-black.svg' %>" 
+                 alt="Profile" 
+                 class="rounded-circle border profile-img">
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+            <li><a class="dropdown-item fw-bold" href="/profile"><i class="fa fa-user me-2"></i>Profile</a></li>
+            <li><a class="dropdown-item fw-bold" href="/settings"><i class="fa fa-gear me-2"></i>Settings</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item fw-bold" href="/auth/logout"><i class="fa fa-sign-out-alt me-2"></i>Logout</a></li>
+          </ul>
+        </div>
+      <% } %>
+
+    </div>
+  </div>
+</nav>
+
+<!-- ============================= -->
+<!-- 📌 Styles -->
+<!-- ============================= -->
+<style>
+  /* Search bar */
+  .search-input {
+    height: 40px;
+    border: 1px solid #ddd;
+    background-color: #f0f2f5;
+    box-shadow: none;
+  }
+  .search-input:focus {
+    background-color: #fff;
+    box-shadow: none;
+  }
+  .search-btn {
+    height: 36px;
+  }
+
+  /* Notification bell */
+  .notif-btn {
+    height: 40px;
+    width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .notif-btn i {
+    font-size: 18px;
+  }
+  .notif-menu {
+    width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  /* Make notification items wrap */
+  #notificationItems .dropdown-item {
+    white-space: normal;   /* allow text wrapping */
+    word-wrap: break-word; /* break long words if needed */
+    align-items: flex-start;
+  }
+  #notificationItems .dropdown-item a {
+    white-space: normal; 
+  }
+
+  /* Profile image */
+  .profile-img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+  }
+</style>
+
+<!-- ============================= -->
+<!-- 📌 Notifications Script -->
+<!-- ============================= -->
+<script>
+(() => {
+  const notifDropdown = document.getElementById('notificationDropdown');
+  const notifItems = document.getElementById('notificationItems');
+  const notifBadge = document.getElementById('notificationBadge');
+
+  async function fetchNotifications(markAsRead = false) {
+    try {
+      const res = await fetch(`/notifications/fetch${markAsRead ? '?markRead=1' : ''}`);
+      const data = await res.json();
+
+      notifItems.innerHTML = '';
+      if (!data.success || data.notifications.length === 0) {
+        notifItems.innerHTML = `<li class="dropdown-item text-muted text-center">No notifications yet</li>`;
+        notifBadge.classList.add('d-none');
+        return;
+      }
+
+      let unreadCount = 0;
+
+      data.notifications.forEach(notif => {
+        if (!notif.is_read) unreadCount++;
+
+        // build link destination
+        const profileUrl = `/@${notif.username}`;
+
+        const li = document.createElement('li');
+        li.className = `dropdown-item d-flex align-items-start ${notif.is_read ? '' : 'fw-bold bg-light'}`;
+        li.innerHTML = `
+          <a href="${profileUrl}" class="d-flex text-decoration-none text-dark w-100">
+            <div class="me-2">
+              ${
+                notif.type === 'like'
+                  ? '<i class="fas fa-thumbs-up text-primary"></i>'
+                  : notif.type === 'comment'
+                  ? '<i class="fas fa-comment text-success"></i>'
+                  : notif.type === 'friend_request'
+                  ? '<i class="fas fa-user-friends text-warning"></i>'
+                  : '<i class="fas fa-bell"></i>'
+              }
+            </div>
+            <div class="flex-grow-1">
+              <div>
+                ${
+                  notif.type === 'like'
+                    ? `@${notif.username} liked your post`
+                    : notif.type === 'comment'
+                    ? `@${notif.username} commented: "${notif.content}"`
+                    : notif.type === 'friend_request'
+                    ? `@${notif.username} sent you a friend request`
+                    : `@${notif.username}` + ' ' + notif.content
+                }
+              </div>
+              <small class="text-muted">${new Date(notif.created_at).toLocaleString()}</small>
+            </div>
+          </a>
+        `;
+        notifItems.appendChild(li);
+      });
+
+      // Update badge
+      if (unreadCount > 0) {
+        notifBadge.textContent = unreadCount;
+        notifBadge.classList.remove('d-none');
+      } else {
+        notifBadge.classList.add('d-none');
+      }
+    } catch (err) {
+      console.error('Error loading notifications:', err);
+    }
+  }
+
+  // Initial fetch
+  fetchNotifications(false);
+
+  // Mark as read when dropdown opens
+  notifDropdown.addEventListener('click', () => fetchNotifications(true));
+})();
+</script>

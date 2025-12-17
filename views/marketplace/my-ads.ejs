@@ -1,0 +1,231 @@
+<%- include('../bootstrap/header') %>
+<%- include('../bootstrap/header-nav', { user: user }) %>
+
+<div class="bg-light py-3">
+  <div class="container-fluid">
+    <div class="row g-4">
+
+      <!-- SIDEBAR -->
+      <div class="col-lg-3">
+        <!-- Sidebar for Desktop -->
+        <div class="sidebar bg-white p-3 rounded shadow-sm d-none d-lg-block">
+          <ul class="nav flex-column">
+            <li class="nav-item"><a class="nav-link" href="/"><i class="fas fa-home me-3"></i>Feeds</a></li>
+            <li class="nav-item"><a class="nav-link" href="/@<%- user.username %>#posts"><i class="fas fa-sticky-note me-3"></i>My posts</a></li>
+            <li class="nav-item"><a class="nav-link" href="/@<%- user.username %>#friends"><i class="fas fa-user-friends me-3"></i>My friends</a></li>
+            <li class="nav-item mt-2 mb-2 border-top"></li>
+            <li class="nav-item"><a class="nav-link active" href="/marketplace"><i class="fas fa-store me-3"></i>Marketplace</a></li>
+            <li class="nav-item"><a class="nav-link" href="/marketplace/add-ads"><i class="fas fa-plus me-3"></i>Post An Ad</a></li>
+            <li class="nav-item"><a class="nav-link" href="/marketplace/my-ads"><i class="fas fa-list me-3"></i>My Ads</a></li>
+            <li class="nav-item mt-2 mb-2 border-top"></li>
+            <li class="nav-item"><a class="nav-link" href="/settings"><i class="fas fa-gear me-3"></i>Settings</a></li>
+            <li class="nav-item"><a class="nav-link" href="/auth/logout"><i class="fas fa-sign-out-alt me-3"></i>Logout</a></li>
+          </ul>
+        </div>
+
+        <!-- Dropdown for Mobile -->
+        <div class="dropdown d-block d-lg-none">
+          <button class="btn btn-dark w-100 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Menu
+          </button>
+          <ul class="dropdown-menu w-100">
+            <li><a class="dropdown-item" href="/"><i class="fas fa-home me-3"></i>Feeds</a></li>
+            <li><a class="dropdown-item" href="/@<%- user.username %>#posts"><i class="fas fa-sticky-note me-3"></i>My posts</a></li>
+            <li><a class="dropdown-item" href="/@<%- user.username %>#friends"><i class="fas fa-user-friends me-3"></i>My friends</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item active" href="/marketplace"><i class="fas fa-store me-3"></i>Marketplace</a></li>
+            <li><a class="dropdown-item" href="/marketplace/add-ads"><i class="fas fa-plus me-3"></i>Post An Ad</a></li>
+            <li><a class="dropdown-item" href="/marketplace/my-ads"><i class="fas fa-list me-3"></i>My Ads</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="/settings"><i class="fas fa-gear me-3"></i>Settings</a></li>
+            <li><a class="dropdown-item" href="/auth/logout"><i class="fas fa-sign-out-alt me-3"></i>Logout</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- MY ADS -->
+      <div class="col-lg-9">
+
+        <!-- Header Row -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="fw-bold">My Ads</h4>
+          <div class="d-flex gap-2">
+            <input type="text" id="search" class="form-control form-control-sm" placeholder="Search your ads...">
+            <select id="sort" class="form-select form-select-sm">
+              <option value="">Sort by</option>
+              <option value="1">Price: Low to High</option>
+              <option value="2">Price: High to Low</option>
+              <option value="3">Newest</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Ads Grid -->
+        <div class="row g-4" id="ads-grid">
+          <!-- User ads will be injected here -->
+        </div>
+
+        <!-- Pagination -->
+        <nav>
+          <ul class="pagination justify-content-center mt-4" id="pagination"></ul>
+        </nav>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const searchInput = document.getElementById('search');
+  const sortSelect = document.getElementById('sort');
+  const adsGrid = document.getElementById('ads-grid');
+  const pagination = document.getElementById('pagination');
+  let currentPage = 1;
+  const limit = 6; // must match server limit
+
+  async function fetchMyAds(page = 1) {
+    try {
+      currentPage = page;
+      const search = searchInput ? searchInput.value : '';
+      const sort = sortSelect ? sortSelect.value : '';
+
+      const res = await fetch(
+        `/marketplace/my-ads/filter?search=${encodeURIComponent(search)}&sort=${sort}&page=${page}&limit=${limit}`
+      );
+      const data = await res.json();
+
+      // Render ads
+      adsGrid.innerHTML = '';
+      if (!data.ads || data.ads.length === 0) {
+        adsGrid.innerHTML = `
+          <div class="col-12 text-center py-5">
+            <h5 class="text-muted">You have not posted any ads yet</h5>
+          </div>`;
+      } else {
+        data.ads.forEach(ad => {
+        const div = document.createElement('div');
+        div.classList.add('col-md-4', 'ad-item');
+
+        // Handle images safely
+        let images = [];
+        if (ad.images) {
+            images = ad.images.split(',').map(img => img.trim()).filter(Boolean);
+        }
+        if (images.length === 0) images = ['https://placehold.co/300x180'];
+
+        const carouselId = `carousel-${ad.id}`;
+        let carouselInner = '';
+        images.forEach((img, index) => {
+            carouselInner += `
+            <div class="carousel-item ${index === 0 ? 'active' : ''}">
+                <img src="${img}" class="d-block w-100" alt="${ad.title}" style="height: 200px; width: 200px; object-fit: cover;">
+            </div>
+            `;
+        });
+
+        div.innerHTML = `
+            <div class="product-card card shadow-sm">
+            <div id="${carouselId}" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                ${carouselInner}
+                </div>
+                ${images.length > 1 ? `
+                <button class="carousel-control-prev" type="button" data-bs-target="#${carouselId}" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#${carouselId}" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>` : ''}
+            </div>
+            <div class="card-body">
+                <h6 class="mb-1">${ad.title}</h6>
+                <p class="text-primary fw-bold mb-1">$${ad.price}</p>
+                <small class="text-muted">${ad.location || ''}</small>
+                <div class="mt-2 d-flex gap-2">
+                <a href="/marketplace/edit-ads/${ad.id}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-edit me-1"></i>Edit
+                </a>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteAd(${ad.id})">
+                    <i class="fas fa-trash me-1"></i>Delete
+                </button>
+                </div>
+            </div>
+            </div>
+        `;
+        adsGrid.appendChild(div);
+        });
+      }
+
+      // Render pagination
+      pagination.innerHTML = '';
+      if (data.totalPages > 0) {
+        // Previous
+        const prevLi = document.createElement('li');
+        prevLi.classList.add('page-item');
+        if (currentPage === 1) prevLi.classList.add('disabled');
+        prevLi.innerHTML = `<a class="page-link" href="#">Previous</a>`;
+        prevLi.addEventListener('click', e => {
+          e.preventDefault();
+          if (currentPage > 1) fetchMyAds(currentPage - 1);
+        });
+        pagination.appendChild(prevLi);
+
+        // Numbers
+        for (let i = 1; i <= data.totalPages; i++) {
+          const li = document.createElement('li');
+          li.classList.add('page-item');
+          if (i === currentPage) li.classList.add('active');
+          li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+          li.addEventListener('click', e => {
+            e.preventDefault();
+            fetchMyAds(i);
+          });
+          pagination.appendChild(li);
+        }
+
+        // Next
+        const nextLi = document.createElement('li');
+        nextLi.classList.add('page-item');
+        if (currentPage === data.totalPages) nextLi.classList.add('disabled');
+        nextLi.innerHTML = `<a class="page-link" href="#">Next</a>`;
+        nextLi.addEventListener('click', e => {
+          e.preventDefault();
+          if (currentPage < data.totalPages) fetchMyAds(currentPage + 1);
+        });
+        pagination.appendChild(nextLi);
+      }
+    } catch (err) {
+      console.error('Error fetching ads:', err);
+      adsGrid.innerHTML = `
+        <div class="col-12 text-center py-5">
+          <h5 class="text-danger">⚠️ Failed to load ads. Please try again later.</h5>
+        </div>`;
+    }
+  }
+
+  // Initial load
+  fetchMyAds();
+
+  // Event listeners (safe checks)
+  if (searchInput) searchInput.addEventListener('input', () => fetchMyAds(1));
+  if (sortSelect) sortSelect.addEventListener('change', () => fetchMyAds(1));
+
+  // Delete Ad
+  async function deleteAd(id) {
+    if (!confirm("Are you sure you want to delete this ad?")) return;
+    try {
+      const res = await fetch(`/marketplace/delete/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        fetchMyAds(currentPage);
+      } else {
+        alert("❌ Failed to delete ad");
+      }
+    } catch (err) {
+      console.error('Delete error:', err);
+      alert("⚠️ Something went wrong while deleting");
+    }
+  }
+</script>
+
+<%- include('../bootstrap/footer') %>

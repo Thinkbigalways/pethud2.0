@@ -1,0 +1,128 @@
+<%- include('bootstrap/header') %>
+<%- include('bootstrap/header-nav', { user: user }) %>
+
+<div class="bg-light">
+ <div class="container-fluid py-3">
+  <div class="row g-4">
+    
+    <!-- SIDEBAR -->
+    <div class="col-lg-3">
+      <!-- Sidebar for Desktop -->
+      <div class="bg-white p-3 rounded shadow-sm d-none d-lg-block">
+        <h5 class="fw-bold mb-3">Settings</h5>
+        <ul class="sidebar nav flex-column">
+          <li class="nav-item"><a class="nav-link" href="/"><i class="fas fa-home me-3"></i>Feeds</a></li>
+          <li class="nav-item"><a class="nav-link" href="/@<%- user.username %>#posts"><i class="fas fa-sticky-note me-3"></i>My posts</a></li>
+          <li class="nav-item"><a class="nav-link" href="/@<%- user.username %>#friends"><i class="fas fa-user-friends me-3"></i>My friends</a></li>
+          <li class="nav-item"><a class="nav-link" href="/marketplace"><i class="fas fa-store me-3"></i>Marketplace</a></li>
+          <li class="nav-item mt-2 mb-2 border-top"></li>
+          <li class="nav-item"><a class="nav-link" href="/settings"><i class="fas fa-user me-3"></i>Account</a></li>
+          <li class="nav-item"><a class="nav-link active" href="/settings/profile"><i class="fas fa-shield-alt me-3"></i>Profile</a></li>
+          <li class="nav-item mt-2 mb-2 border-top"></li>
+          <li class="nav-item"><a class="nav-link" href="/settings"><i class="fas fa-gear me-3"></i>Settings</a></li>
+          <li class="nav-item"><a class="nav-link" href="/auth/logout"><i class="fas fa-sign-out-alt me-3"></i>Logout</a></li>
+        </ul>
+      </div>
+
+      <!-- Dropdown for Mobile -->
+      <div class="dropdown d-block d-lg-none mt-3">
+        <button class="btn btn-dark w-100 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          Settings Menu
+        </button>
+        <ul class="dropdown-menu w-100">
+          <li><a class="dropdown-item" href="/"><i class="fas fa-home me-3"></i>Feeds</a></li>
+          <li><a class="dropdown-item" href="/@<%- user.username %>#posts"><i class="fas fa-sticky-note me-3"></i>My posts</a></li>
+          <li><a class="dropdown-item" href="/@<%- user.username %>#friends"><i class="fas fa-user-friends me-3"></i>My friends</a></li>
+          <li><a class="dropdown-item" href="/marketplace"><i class="fas fa-store me-3"></i>Marketplace</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" href="/settings"><i class="fas fa-user me-3"></i>Account</a></li>
+          <li><a class="dropdown-item active" href="/settings/profile"><i class="fas fa-shield-alt me-3"></i>Profile</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" href="/settings"><i class="fas fa-gear me-3"></i>Settings</a></li>
+          <li><a class="dropdown-item" href="/auth/logout"><i class="fas fa-sign-out-alt me-3"></i>Logout</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- SETTINGS CONTENT -->
+    <div class="col-lg-9">
+      
+      <!-- Profile Info -->
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+          <h5 class="fw-bold mb-3">Profile Information</h5>
+
+          <!-- Alerts -->
+          <% if (typeof success !== 'undefined' && success) { %>
+            <div class="alert alert-success" role="alert"><%= success %></div>
+          <% } %>
+          <% if (typeof error !== 'undefined' && error) { %>
+            <div class="alert alert-danger" role="alert"><%= error %></div>
+          <% } %>
+
+          <!-- Profile Form -->
+          <form method="POST" action="/settings/profile" enctype="multipart/form-data">
+            <div class="row g-3">
+
+              <!-- Profile Picture -->
+              <div class="col-md-6 text-center">
+                <label class="form-label fw-semibold d-block">Profile Picture</label>
+                <div class="mb-3">
+                  <% if (currentUser.profile_pic) { %>
+                    <img id="profilePic" src="<%= currentUser.profile_pic %>" alt="Profile" class="rounded-circle shadow-sm" style="height:140px; width: 140px; object-fit:cover;">
+                  <% } else { %>
+                    <img id="profilePic" src="/images/logo-black.svg" alt="Profile" class="rounded-circle shadow-sm" style="height:140px; width: 140px; object-fit:cover;">
+                  <% } %>
+                </div>
+                <input type="file" name="profile_pic" class="form-control">
+              </div>
+
+              <!-- Cover Photo -->
+              <div class="col-md-6 text-center">
+                <label class="form-label fw-semibold d-block">Cover Photo</label>
+                <div class="mb-3">
+                  <% if (currentUser.cover_pic) { %>
+                    <img id="coverPhoto" src="<%= currentUser.cover_pic %>" alt="Cover" class="rounded shadow-sm" width="100%" style="max-height:140px; object-fit:cover;">
+                  <% } else { %>
+                    <img id="coverPhoto" src="/images/logo-black.svg" alt="Cover" class="rounded shadow-sm" width="100%" style="max-height:140px; object-fit:cover;">
+                  <% } %>
+                </div>
+                <input type="file" name="cover_pic" class="form-control">
+              </div>
+
+              <!-- Bio -->
+              <div class="col-12">
+                <label for="bio" class="form-label fw-semibold">Bio</label>
+                <textarea id="bio" name="bio" class="form-control" rows="5"><%= currentUser.bio || '' %></textarea>
+              </div>
+
+              <div class="col-12">
+                <button type="submit" class="btn btn-dark px-4">Save Changes</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<%- include('bootstrap/footer') %>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  function previewImage(input, imgId) {
+    input.addEventListener("change", e => {
+      const file = e.target.files[0];
+      if (file) {
+        document.getElementById(imgId).src = URL.createObjectURL(file);
+      }
+    });
+  }
+
+  previewImage(document.querySelector('input[name="profile_pic"]'), "profilePic");
+  previewImage(document.querySelector('input[name="cover_pic"]'), "coverPhoto");
+});
+</script>

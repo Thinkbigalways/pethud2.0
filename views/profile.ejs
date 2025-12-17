@@ -1,0 +1,402 @@
+<%- include('bootstrap/header') %>
+<%- include('bootstrap/header-nav', { user: user }) %>
+
+<style>
+  .cover-photo {
+    height: 300px;
+    background: url("<%= profileUser.cover_pic ? profileUser.cover_pic : 'https://placehold.co/1500x300' %>") center/cover no-repeat;
+    position: relative;
+    background-size: cover;
+  }
+  .profile-pic {
+    width: 150px;
+    height: 150px;
+    border: 5px solid #fff;
+    border-radius: 50%;
+    position: absolute;
+    bottom: -75px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: url("<%= profileUser.profile_pic ? profileUser.profile_pic : 'https://placehold.co/150' %>") center/cover no-repeat;
+    background-size: cover;
+  }
+  .profile-info {
+    margin-top: 80px;
+    text-align: center;
+  }
+  .profile-info h3 {
+    margin-bottom: 0;
+  }
+  
+  /* Styling for upload buttons */
+  .upload-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    z-index: 10;
+  }
+  .profile-upload-btn {
+    bottom: 5px;
+    right: 5px;
+    background: rgba(0, 0, 0, 0.6);
+  }
+  .hidden-input {
+    display: none;
+  }
+</style>
+
+<div class="bg-light">
+  <div class="cover-photo" id="cover-photo-container">
+    <% if (user && user.id === profileUser.id) { %>
+      <form id="cover-form" method="POST" action="/profile/upload/cover" enctype="multipart/form-data">
+        <label for="cover-photo-input" class="upload-btn">
+          <i class="fas fa-camera"></i>
+          <span class="d-none d-lg-inline ms-2">Upload Cover</span>
+        </label>
+        <input type="file" id="cover-photo-input" name="cover_pic" class="hidden-input" accept="image/*">
+      </form>
+    <% } %>
+    
+    <div class="profile-pic" id="profile-pic-container">
+      <% if (user && user.id === profileUser.id) { %>
+        <form id="profile-pic-form" method="POST" action="/profile/upload/profile" enctype="multipart/form-data">
+          <label for="profile-pic-input" class="upload-btn profile-upload-btn">
+            <i class="fas fa-camera"></i>
+          </label>
+          <input type="file" id="profile-pic-input" name="profile_pic" class="hidden-input" accept="image/*">
+        </form>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="container profile-info">
+    <h3 class="fw-bold">
+      <% if (user && user.id == profileUser.id) { %>
+        <%= profileUser.first_name + ' ' + profileUser.last_name %>
+      <% } else { %>
+        @<%= profileUser.username %>
+      <% } %>
+    </h3>
+    <p class="text-muted mb-1"><%= profileUser.bio || "No bio added yet" %></p>
+    <div class="d-flex justify-content-center gap-2 mb-2" id="friendship-buttons">
+      <% if (user && user.id !== profileUser.id) { %>
+        <% if (friendStatus === 'none') { %>
+          <button id="addFriendBtn" class="btn btn-primary" data-friend-id="<%= profileUser.id %>">
+            <i class="fas fa-user-plus me-2"></i>Add Friend
+          </button>
+          <button class="btn btn-dark ms-2"><i class="fas fa-comment me-2"></i>Message</button>
+        
+        <% } else if (friendStatus === 'pending' && requestFromProfileUser) { %>
+          <button id="acceptFriendBtn" class="btn btn-success" data-friend-id="<%= profileUser.id %>">
+            <i class="fas fa-user-check me-2"></i>Accept Request
+          </button>
+          <button id="cancelRequestBtn" class="btn btn-danger ms-2" data-friend-id="<%= profileUser.id %>">
+            <i class="fas fa-times me-2"></i>Cancel Request
+          </button>
+          <button class="btn btn-dark ms-2"><i class="fas fa-comment me-2"></i>Message</button>
+        
+        <% } else if (friendStatus === 'pending' && !requestFromProfileUser) { %>
+          <button id="cancelRequestBtn" class="btn btn-danger" data-friend-id="<%= profileUser.id %>">
+            <i class="fas fa-times me-2"></i>Cancel Request
+          </button>
+          <button class="btn btn-dark ms-2"><i class="fas fa-comment me-2"></i>Message</button>
+        
+        <% } else if (friendStatus === 'accepted') { %>
+          <span class="btn btn-secondary disabled">
+            <i class="fas fa-user-check me-2"></i>Friends
+          </span>
+          <button id="removeFriendBtn" class="btn btn-danger ms-2" data-friend-id="<%= profileUser.id %>">
+            <i class="fas fa-user-times me-2"></i>Unfriend
+          </button>
+          <button class="btn btn-dark ms-2"><i class="fas fa-comment me-2"></i>Message</button>
+        <% } %>
+      <% } %>
+    </div>
+
+    <ul class="nav nav-tabs justify-content-center">
+      <li class="nav-item">
+        <a class="nav-link active" data-bs-toggle="tab" href="#posts">Posts</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#about">About</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#friends">Friends</a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="container pb-5">
+    <div class="tab-content">
+      <div class="tab-pane fade show active" id="posts">
+        <%- include('partials/profile-posts') %>
+      </div>
+       
+      <div class="tab-pane fade" id="about">
+        <div class="card rounded-3 border-0 shadow-sm p-3">
+          <div class="card-body">
+            <h5 class="mb-3 fw-bold">About <%= profileUser.first_name %></h5>
+            <p class="mb-3"><i class="fas fa-quote-left me-2 text-muted"></i>
+              <%= profileUser.bio || "This user hasn’t written anything yet." %>
+            </p>
+            <div class="row row-cols-1 row-cols-md-2 g-3">
+              <div class="col">
+                <div class="d-flex align-items-center">
+                  <i class="fas fa-envelope me-2 text-primary"></i>
+                  <div>
+                    <small class="text-muted">Email</small>
+                    <div><%= profileUser.email %></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col">
+                <div class="d-flex align-items-center">
+                  <i class="fas fa-birthday-cake me-2 text-warning"></i>
+                  <div>
+                    <small class="text-muted">Birthday</small>
+                    <div>
+                      <%= profileUser.dob 
+                            ? new Date(profileUser.dob).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) 
+                            : "Not set" %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col">
+                <div class="d-flex align-items-center">
+                  <i class="fas fa-venus-mars me-2 text-danger"></i>
+                  <div>
+                    <small class="text-muted">Gender</small>
+                    <div>
+                      <%= profileUser.gender 
+                            ? profileUser.gender.charAt(0).toUpperCase() + profileUser.gender.slice(1).toLowerCase() 
+                            : "Not set" %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col">
+                <div class="d-flex align-items-center">
+                  <i class="fas fa-map-marker-alt me-2 text-success"></i>
+                  <div>
+                    <small class="text-muted">Location</small>
+                    <div><%= profileUser.location || "Not set" %></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="friends">
+        <div class="card rounded-0 border-0 shadow-sm">
+          <div class="card-body">
+            <p class="fw-bold border-bottom mb-3 pb-3">Friends (<%= friends.length %>)</p>
+            <div class="row g-3">
+              <% if (friends.length === 0) { %>
+                <p class="text-muted">No friends yet</p>
+              <% } else { %>
+                <% friends.forEach(friend => { %>
+                  <div class="col-6">
+                    <div class="card rounded-4">
+                      <div class="card-body p-2">
+                        <a href="/@<%= friend.username %>" class="text-decoration-none text-dark">
+                          <div class="d-flex align-items-center gap-3">
+                            <img src="<%= friend.profile_pic || 'https://placehold.co/80' %>" 
+                              alt="<%= friend.first_name %> <%= friend.last_name %>" 
+                              class="rounded-4 border img-fluid" style="width: 70px; height: 70px; object-fit: cover;">
+                            <p class="small fw-bold mb-0"><%= friend.first_name %> <%= friend.last_name %></p>
+                          </div>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                <% }) %>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('bootstrap/footer') %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Handle tab navigation based on URL hash
+    const hash = window.location.hash;
+    if (hash) {
+      const triggerEl = document.querySelector(`.nav-tabs a[href="${hash}"]`);
+      if (triggerEl) {
+        const tab = new bootstrap.Tab(triggerEl);
+        tab.show();
+      }
+    }
+
+    // --- NEW JAVASCRIPT FOR IMAGE UPLOAD PREVIEW & SUBMISSION ---
+    const coverPhotoInput = document.getElementById('cover-photo-input');
+    const profilePicInput = document.getElementById('profile-pic-input');
+    const coverPhotoContainer = document.getElementById('cover-photo-container');
+    const profilePicContainer = document.getElementById('profile-pic-container');
+    const coverForm = document.getElementById('cover-form');
+    const profilePicForm = document.getElementById('profile-pic-form');
+
+    function handleImageChange(inputElement, containerElement, formElement) {
+      const file = inputElement.files[0];
+      if (file) {
+        // Preview the image
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          containerElement.style.backgroundImage = `url('${e.target.result}')`;
+        };
+        reader.readAsDataURL(file);
+
+        // Submit the form automatically
+        formElement.submit();
+      }
+    }
+
+    if (coverPhotoInput) {
+      coverPhotoInput.addEventListener('change', () => {
+        handleImageChange(coverPhotoInput, coverPhotoContainer, coverForm);
+      });
+    }
+
+    if (profilePicInput) {
+      profilePicInput.addEventListener('change', () => {
+        handleImageChange(profilePicInput, profilePicContainer, profilePicForm);
+      });
+    }
+
+    // --- EXISTING JAVASCRIPT FOR FRIEND BUTTONS ---
+    const buttonContainer = document.getElementById('friendship-buttons');
+    if (!buttonContainer) return;
+
+    // Helper: Replace buttons in the container
+    function replaceButtons(buttons) {
+      buttonContainer.innerHTML = '';
+      buttons.forEach(btn => buttonContainer.appendChild(btn));
+    }
+
+    // Helper: Create a button
+    function createButton(id, className, iconClass, text, friendId) {
+      const btn = document.createElement('button');
+      btn.id = id;
+      btn.className = className;
+      btn.dataset.friendId = friendId;
+      btn.innerHTML = `<i class="${iconClass} me-2"></i>${text}`;
+      return btn;
+    }
+
+    // Helper: Create a disabled span (e.g., for "Friends" label)
+    function createSpan(className, iconClass, text) {
+      const span = document.createElement('span');
+      span.className = className;
+      span.innerHTML = `<i class="${iconClass} me-2"></i>${text}`;
+      return span;
+    }
+
+    // Helper: Make API request
+    async function makeRequest(url, friendId) {
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ friendId }),
+        });
+        const data = await res.json();
+        if (!data.success) {
+          throw new Error(data.message || 'Request failed');
+        }
+        return data;
+      } catch (err) {
+        throw err;
+      }
+    }
+
+    // Handle Add Friend
+    async function handleAdd(btn) {
+      const friendId = btn.dataset.friendId;
+      btn.disabled = true;
+      try {
+        await makeRequest('/friends/request', friendId);
+        replaceButtons([
+          createButton('cancelRequestBtn', 'btn btn-danger', 'fas fa-times', 'Cancel Request', friendId),
+          createButton('', 'btn btn-dark ms-2', 'fas fa-comment', 'Message', friendId),
+        ]);
+      } catch (err) {
+        btn.disabled = false;
+        alert(err.message || 'Error sending friend request');
+      }
+    }
+
+    // Handle Accept Request
+    async function handleAccept(btn) {
+      const friendId = btn.dataset.friendId;
+      btn.disabled = true;
+      try {
+        await makeRequest('/friends/accept', friendId);
+        replaceButtons([
+          createSpan('btn btn-secondary disabled', 'fas fa-user-check', 'Friends'),
+          createButton('removeFriendBtn', 'btn btn-danger ms-2', 'fas fa-user-times', 'Unfriend', friendId),
+          createButton('', 'btn btn-dark ms-2', 'fas fa-comment', 'Message', friendId),
+        ]);
+      } catch (err) {
+        btn.disabled = false;
+        alert(err.message || 'Error accepting friend request');
+      }
+    }
+
+    // Handle Cancel Request
+    async function handleCancel(btn) {
+      const friendId = btn.dataset.friendId;
+      btn.disabled = true;
+      try {
+        await makeRequest('/friends/cancel', friendId);
+        replaceButtons([
+          createButton('addFriendBtn', 'btn btn-primary', 'fas fa-user-plus', 'Add Friend', friendId),
+          createButton('', 'btn btn-dark ms-2', 'fas fa-comment', 'Message', friendId),
+        ]);
+      } catch (err) {
+        btn.disabled = false;
+        alert(err.message || 'Error canceling friend request');
+      }
+    }
+
+    // Handle Remove Friend
+    async function handleRemove(btn) {
+      const friendId = btn.dataset.friendId;
+      btn.disabled = true;
+      try {
+        await makeRequest('/friends/remove', friendId);
+        replaceButtons([
+          createButton('addFriendBtn', 'btn btn-primary', 'fas fa-user-plus', 'Add Friend', friendId),
+          createButton('', 'btn btn-dark ms-2', 'fas fa-comment', 'Message', friendId),
+        ]);
+      } catch (err) {
+        btn.disabled = false;
+        alert(err.message || 'Error removing friend');
+      }
+    }
+
+    // Event delegation for friend buttons
+    buttonContainer.addEventListener('click', (e) => {
+      const target = e.target.closest('button');
+      if (!target) return;
+
+      if (target.id === 'addFriendBtn') handleAdd(target);
+      else if (target.id === 'acceptFriendBtn') handleAccept(target);
+      else if (target.id === 'cancelRequestBtn') handleCancel(target);
+      else if (target.id === 'removeFriendBtn') handleRemove(target);
+    });
+  });
+</script>

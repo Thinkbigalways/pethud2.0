@@ -1,0 +1,123 @@
+<%- include('bootstrap/header') %>
+<%- include('bootstrap/header-nav', { user: user }) %>
+
+<div class="bg-light">
+ <div class="container-fluid py-3">
+  <div class="row g-4">
+    
+    <!-- SIDEBAR -->
+    <div class="col-lg-3">
+      <!-- Sidebar for Desktop -->
+      <div class="bg-white p-3 rounded shadow-sm d-none d-lg-block">
+        <h5 class="fw-bold mb-3">Settings</h5>
+        <ul class="sidebar nav flex-column">
+          <li class="nav-item"><a class="nav-link" href="/"><i class="fas fa-home me-3"></i>Feeds</a></li>
+          <li class="nav-item"><a class="nav-link" href="/@<%- user.username %>#posts"><i class="fas fa-sticky-note me-3"></i>My posts</a></li>
+          <li class="nav-item"><a class="nav-link" href="/@<%- user.username %>#friends"><i class="fas fa-user-friends me-3"></i>My friends</a></li>
+          <li class="nav-item"><a class="nav-link" href="/marketplace"><i class="fas fa-store me-3"></i>Marketplace</a></li>
+          <li class="nav-item mt-2 mb-2 border-top"></li>
+          <li class="nav-item"><a class="nav-link active" href="/settings"><i class="fas fa-user me-3"></i>Account</a></li>
+          <li class="nav-item"><a class="nav-link" href="/settings/profile"><i class="fas fa-shield-alt me-3"></i>Profile</a></li>
+          <li class="nav-item mt-2 mb-2 border-top"></li>
+          <li class="nav-item"><a class="nav-link" href="/settings"><i class="fas fa-gear me-3"></i>Settings</a></li>
+          <li class="nav-item"><a class="nav-link" href="/auth/logout"><i class="fas fa-sign-out-alt me-3"></i>Logout</a></li>
+        </ul>
+      </div>
+
+      <!-- Dropdown for Mobile -->
+      <div class="dropdown d-block d-lg-none mt-3">
+        <button class="btn btn-dark w-100 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          Settings Menu
+        </button>
+        <ul class="dropdown-menu w-100">
+          <li><a class="dropdown-item" href="/"><i class="fas fa-home me-3"></i>Feeds</a></li>
+          <li><a class="dropdown-item" href="/@<%- user.username %>#posts"><i class="fas fa-sticky-note me-3"></i>My posts</a></li>
+          <li><a class="dropdown-item" href="/@<%- user.username %>#friends"><i class="fas fa-user-friends me-3"></i>My friends</a></li>
+          <li><a class="dropdown-item" href="/marketplace"><i class="fas fa-store me-3"></i>Marketplace</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item active" href="/settings"><i class="fas fa-user me-3"></i>Account</a></li>
+          <li><a class="dropdown-item" href="/settings/profile"><i class="fas fa-shield-alt me-3"></i>Profile</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" href="/settings"><i class="fas fa-gear me-3"></i>Settings</a></li>
+          <li><a class="dropdown-item" href="/auth/logout"><i class="fas fa-sign-out-alt me-3"></i>Logout</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- SETTINGS CONTENT -->
+    <div class="col-lg-9">
+      
+      <!-- Account Info -->
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+          <h5 class="fw-bold mb-3">Account Information</h5>
+          <!-- Alert -->
+          <% if (typeof successAccount !== 'undefined' && successAccount) { %>
+            <div class="alert alert-success" role="alert">
+                <%= successAccount %>
+            </div>
+          <% } %>
+          <!-- Account Info Form -->
+          <form method="POST" action="/settings">
+            <div class="row g-3">
+              <div class="col-6">
+                <label for="firstname" class="form-label fw-semibold">First Name</label>
+                <input type="text" id="firstname" name="first_name" class="form-control" value="<%= currentUser.first_name %>">
+              </div>
+              <div class="col-6">
+                <label for="lastname" class="form-label fw-semibold">Last Name</label>
+                <input type="text" id="lastname" name="last_name" class="form-control" value="<%= currentUser.last_name %>">
+              </div>
+              <div class="col-12">
+                <label for="email" class="form-label fw-semibold">Email</label>
+                <input type="email" id="email" name="email" class="form-control" value="<%= currentUser.email %>">
+              </div>
+              <div class="col-12">
+                <label for="dob" class="form-label fw-semibold">Date of Birth</label>
+                <input type="date" name="dob" id="dob" class="form-control" 
+                  value="<%= currentUser.dob ? new Date(currentUser.dob).toISOString().split('T')[0] : '' %>" required>
+              </div>
+              <div class="col-12">
+                <label for="gender" class="form-label fw-semibold">Gender</label>
+                <select name="gender" id="gender" class="form-select" required>
+                  <option value="" disabled>Select Gender</option>
+                  <option value="male" <%= currentUser.gender === 'male' ? 'selected' : '' %>>Male</option>
+                  <option value="female" <%= currentUser.gender === 'female' ? 'selected' : '' %>>Female</option>
+                  <option value="other" <%= currentUser.gender === 'other' ? 'selected' : '' %>>Other</option>
+                </select>
+              </div>
+              <div class="col-12">
+                <button type="submit" class="btn btn-dark px-4">Save Changes</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Security -->
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h5 class="fw-bold mb-3">Security</h5>
+          <!-- Success Alert -->
+          <% if (typeof successPassword !== 'undefined' && successPassword) { %>
+            <div class="alert alert-success" role="alert">
+                <%= successPassword %>
+            </div>
+          <% } %>
+          <!-- Password Form -->
+          <form method="POST" action="/settings/password" class="mt-3">
+            <div class="mb-3">
+              <label class="form-label">New Password</label>
+              <input type="password" name="password" class="form-control" placeholder="New Password">
+            </div>
+            <button type="submit" class="btn btn-dark px-4">Update Password</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<%- include('bootstrap/footer') %>
