@@ -40,26 +40,53 @@ if (!admin.apps.length) {
     }
   }
 
-  // 2) Try local serviceAccountKey.json (for local development)
+  // 2) Try firebase/serviceAccountKey.json (for local development)
   if (!initialized) {
     const serviceAccountPath = path.join(__dirname, 'serviceAccountKey.json');
     if (fs.existsSync(serviceAccountPath)) {
       try {
-        const serviceAccount = require(serviceAccountPath);
+        const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
         admin.initializeApp({
           credential: admin.credential.cert(serviceAccount),
-          projectId: firebaseConfig.projectId,
-          storageBucket: firebaseConfig.storageBucket,
+          projectId: serviceAccount.project_id || firebaseConfig.projectId,
+          storageBucket: process.env.FIREBASE_STORAGE_BUCKET || (serviceAccount.project_id ? serviceAccount.project_id + '.appspot.com' : null) || firebaseConfig.storageBucket,
         });
         initialized = true;
-        console.log('Firebase Admin initialized with serviceAccountKey.json');
+        console.log('Firebase Admin initialized with firebase/serviceAccountKey.json');
       } catch (err) {
         console.error('Failed to initialize Firebase Admin with serviceAccountKey.json:', err.message);
       }
     }
   }
 
-  // 3) Fallback: application default credentials (GOOGLE_APPLICATION_CREDENTIALS)
+  // 3) Try project root: serviceAccountKey.json or *-firebase-adminsdk-*.json
+  if (!initialized) {
+    const projectRoot = path.join(__dirname, '..');
+    let keyPath = path.join(projectRoot, 'serviceAccountKey.json');
+    if (!fs.existsSync(keyPath)) {
+      const files = fs.readdirSync(projectRoot);
+      const adminsdk = files.find(function (f) {
+        return f.endsWith('.json') && f.includes('firebase') && f.includes('adminsdk');
+      });
+      if (adminsdk) keyPath = path.join(projectRoot, adminsdk);
+    }
+    if (fs.existsSync(keyPath)) {
+      try {
+        const serviceAccount = JSON.parse(fs.readFileSync(keyPath, 'utf8'));
+        admin.initializeApp({
+          credential: admin.credential.cert(serviceAccount),
+          projectId: serviceAccount.project_id || firebaseConfig.projectId,
+          storageBucket: process.env.FIREBASE_STORAGE_BUCKET || (serviceAccount.project_id ? serviceAccount.project_id + '.appspot.com' : null) || firebaseConfig.storageBucket,
+        });
+        initialized = true;
+        console.log('Firebase Admin initialized with ' + path.basename(keyPath));
+      } catch (err) {
+        console.error('Failed to initialize Firebase Admin with ' + keyPath + ':', err.message);
+      }
+    }
+  }
+
+  // 4) Fallback: application default credentials (GOOGLE_APPLICATION_CREDENTIALS)
   if (!initialized) {
     try {
       admin.initializeApp({
@@ -76,10 +103,10 @@ if (!admin.apps.length) {
   }
 }
 
-// Firestore & Storage instances
+// Firestore & Storage instances (bucket uses app default from initializeApp)
 const db = admin.firestore();
 const storage = admin.storage();
-const bucket = storage.bucket(firebaseConfig.storageBucket);
+const bucket = storage.bucket();
 
 module.exports = {
   admin,

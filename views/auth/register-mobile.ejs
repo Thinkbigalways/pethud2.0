@@ -46,11 +46,12 @@
       <div class="col-12">
         <label for="password" class="form-label fw-bold">Password <span class="text-danger">*</span></label>
         <div class="input-group">
-          <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
+          <input type="password" id="password" name="password" class="form-control" placeholder="At least 8 characters" minlength="8" required>
           <button type="button" class="input-group-text toggle-password">
             <i class="fa fa-eye"></i>
           </button>
         </div>
+        <small class="form-text text-muted">Use at least 8 characters.</small>
       </div>
       <div class="col-6">
         <label for="dob" class="form-label fw-bold">Date of Birth <span class="text-danger">*</span></label>

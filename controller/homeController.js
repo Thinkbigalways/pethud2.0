@@ -61,6 +61,7 @@ async function showHome(req, res, next) {
       user,
       posts,
       suggestions,
+      error: req.query.error || null,
     });
   } catch (err) {
     console.error('Error in showHome:', err);

@@ -1,3 +1,7 @@
+// Load .env and .env.local first so FIREBASE_SERVICE_ACCOUNT etc. are available
+require('dotenv').config();
+require('dotenv').config({ path: '.env.local', override: true });
+
 const app = require('./app');
 
 // For Vercel, export the app directly

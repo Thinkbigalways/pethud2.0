@@ -3,6 +3,12 @@
 
 <div class="py-3 bg-light">
 <div class="container-fluid">
+  <% if (typeof error !== 'undefined' && error) { %>
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <%= error %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  <% } %>
   <div class="row g-4">
     
     <!-- LEFT SIDEBAR -->
@@ -114,10 +120,10 @@
 
           <!-- Media Upload -->
           <div class="border rounded p-3 mt-2 text-center">
-            <label class="mb-0" style="cursor:pointer;">
+            <label for="createPostMedia" class="mb-0" style="cursor:pointer;">
               <i class="fas fa-image text-success me-2"></i>
               <span>Add Photos/Videos</span>
-              <input type="file" name="media" accept="image/*,video/*" multiple class="d-none">
+              <input type="file" id="createPostMedia" name="media" accept="image/*,video/*" multiple class="visually-hidden">
             </label>
           </div>
 
@@ -136,13 +142,17 @@
 </div>
 
 <script>
-  // Optional: live preview of selected images/videos
-  const fileInput = document.querySelector('input[name="media"]');
-  const preview = document.getElementById('mediaPreview');
+  // Live preview of selected images/videos for create post
+  (function() {
+    const fileInput = document.querySelector('#createPostMedia');
+    const preview = document.getElementById('mediaPreview');
+    if (!fileInput || !preview) return;
 
-  fileInput.addEventListener('change', () => {
-    preview.innerHTML = '';
-    Array.from(fileInput.files).forEach(file => {
+    fileInput.addEventListener('change', function() {
+      // Revoke previous object URLs to avoid memory leaks
+      preview.querySelectorAll('img, video').forEach(function(el) { if (el.src && el.src.startsWith('blob:')) URL.revokeObjectURL(el.src); });
+      preview.innerHTML = '';
+      Array.from(fileInput.files).forEach(function(file) {
       const url = URL.createObjectURL(file);
       let element;
       if(file.type.startsWith('video/')){
@@ -159,7 +169,8 @@
       }
       preview.appendChild(element);
     });
-  });
+    });
+  })();
 </script>
 
 <%- include('bootstrap/footer') %>

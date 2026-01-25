@@ -17,6 +17,8 @@ firebase/*.json
 .env.test.local
 .env.production.local
 
+pethud-d7a21-firebase-adminsdk-fbsvc-520143b194.json
+
 # Logs
 logs/
 *.log

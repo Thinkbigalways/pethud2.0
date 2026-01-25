@@ -76,6 +76,12 @@ async function doRegister(req, res) {
   try {
     const { username, first_name, last_name, email, dob, gender, password } = req.body;
 
+    // Password: at least 8 characters
+    if (!password || typeof password !== 'string' || password.length < 8) {
+      const view = isMobile(req) ? 'auth/register-mobile' : 'auth/register';
+      return res.render(view, { error: 'Password must be at least 8 characters.', title: 'Register - Pethudl' });
+    }
+
     // Email check
     const existingEmail = await getUserByEmail(email);
     if (existingEmail) {
