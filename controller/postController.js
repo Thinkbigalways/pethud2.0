@@ -217,7 +217,32 @@ async function getComments(req, res) {
     }
 
     const postData = postDoc.data();
-    const comments = postData.comments || [];
+    const rawComments = postData.comments || [];
+    const currentUserId = req.user && req.user.id;
+
+    // Normalise comment shape for the frontend JS in posts.ejs
+    const comments = rawComments.map((c, index) => {
+      const createdAt = c.created_at;
+      let createdAtIso = null;
+      if (createdAt) {
+        // Firestore Timestamp -> ISO string
+        if (typeof createdAt.toDate === 'function') {
+          createdAtIso = createdAt.toDate().toISOString();
+        } else {
+          createdAtIso = createdAt;
+        }
+      }
+
+      return {
+        id: c.id || String(index),
+        user_id: c.user_id,
+        username: c.username,
+        profile_pic: c.profile_pic || null,
+        comment: c.comment || c.content || '',
+        created_at: createdAtIso,
+        can_delete: !!currentUserId && c.user_id === currentUserId,
+      };
+    });
 
     return res.json({ success: true, comments });
   } catch (err) {
@@ -232,11 +257,12 @@ async function getComments(req, res) {
 async function addComment(req, res) {
   try {
     const { postId } = req.params;
-    const { content } = req.body;
+    // Frontend sends { comment: "..." } in JSON, but support { content } as well for safety
+    const rawComment = req.body.comment || req.body.content;
     const userId = req.user.id;
     const username = req.user.username;
 
-    if (!content || content.trim() === '') {
+    if (!rawComment || rawComment.trim() === '') {
       return res.json({ success: false, message: 'Comment content is required' });
     }
 
@@ -247,11 +273,19 @@ async function addComment(req, res) {
       return res.json({ success: false, message: 'Post not found' });
     }
 
+    const trimmed = rawComment.trim();
+
+    // Firestore doesn't allow FieldValue.serverTimestamp() inside arrays
+    // Use a regular timestamp instead (ISO string format)
+    // Generate a unique ID for the comment so we can delete it later
+    const commentId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const comment = {
+      id: commentId,
       user_id: userId,
       username: username,
-      content: content.trim(),
-      created_at: FieldValue.serverTimestamp(),
+      // Match the field name the frontend expects: "comment"
+      comment: trimmed,
+      created_at: new Date().toISOString(),
     };
 
     await postRef.update({
@@ -273,10 +307,15 @@ async function deleteComment(req, res) {
   try {
     const { commentId } = req.params;
     const userId = req.user.id;
-    const { postId } = req.body;
+    // Support both query param and body for postId
+    const postId = req.query.postId || req.body.postId;
 
     if (!postId) {
       return res.json({ success: false, message: 'Post ID is required' });
+    }
+
+    if (!commentId) {
+      return res.json({ success: false, message: 'Comment ID is required' });
     }
 
     const postRef = db.collection(POSTS_COLLECTION).doc(postId);
@@ -289,12 +328,28 @@ async function deleteComment(req, res) {
     const postData = postDoc.data();
     const comments = postData.comments || [];
     
-    // Find and remove the comment
-    const updatedComments = comments.filter(comment => {
-      // Comments don't have IDs in this structure, so we'll need to match by user_id and content
-      // For now, we'll remove comments by the user
-      return !(comment.user_id === userId);
+    // Find the comment to delete by ID
+    const commentIndex = comments.findIndex(comment => {
+      // Match by id if it exists, otherwise fallback to matching by user_id + created_at
+      if (comment.id) {
+        return comment.id === commentId;
+      }
+      // Fallback for old comments without IDs
+      return comment.user_id === userId && String(comment.created_at) === commentId;
     });
+
+    if (commentIndex === -1) {
+      return res.json({ success: false, message: 'Comment not found' });
+    }
+
+    // Verify the user owns this comment
+    const commentToDelete = comments[commentIndex];
+    if (commentToDelete.user_id !== userId) {
+      return res.json({ success: false, message: 'Unauthorized: You can only delete your own comments' });
+    }
+
+    // Remove the comment from the array
+    const updatedComments = comments.filter((_, index) => index !== commentIndex);
 
     await postRef.update({
       comments: updatedComments,

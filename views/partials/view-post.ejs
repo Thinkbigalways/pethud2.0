@@ -345,7 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!commentId) return;
       if (!confirm('Delete this comment?')) return;
       try {
-        const res = await fetch(`/posts/comment/${commentId}`, { method: 'DELETE' });
+        const res = await fetch(`/posts/comment/${commentId}?postId=${encodeURIComponent(postId)}`, { method: 'DELETE' });
         if (!res.ok) throw new Error('Network error deleting comment');
         const data = await res.json();
         if (data.success) {

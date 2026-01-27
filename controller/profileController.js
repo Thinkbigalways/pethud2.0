@@ -120,6 +120,10 @@ async function showProfile(req, res, next) {
           likes: postData.likes || [],
           comments: postData.comments || [],
           is_liked: viewer && postData.likes && postData.likes.includes(viewer.id),
+          // Add comment count (comments is an array)
+          commentCount: Array.isArray(postData.comments) ? postData.comments.length : 0,
+          // Ensure likes is an array for count
+          likeCount: Array.isArray(postData.likes) ? postData.likes.length : 0,
         };
       });
     } catch (err) {

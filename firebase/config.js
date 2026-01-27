@@ -2,15 +2,22 @@ const admin = require('firebase-admin');
 const path = require('path');
 const fs = require('fs');
 
+// Derive sane Firebase defaults; Storage buckets are always "<project-id>.appspot.com"
+const FALLBACK_PROJECT_ID = process.env.FIREBASE_PROJECT_ID || 'maple-educators-app';
+const FALLBACK_STORAGE_BUCKET =
+  process.env.FIREBASE_STORAGE_BUCKET || `${FALLBACK_PROJECT_ID}.appspot.com`;
+
 // Firebase client-style config - use environment variables with fallbacks
 const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY || "AIzaSyDyL_aadGzyozNjU6QKoRgHjJ_jxlwWJxU",
-  authDomain: process.env.FIREBASE_AUTH_DOMAIN || "maple-educators-app.firebaseapp.com",
-  projectId: process.env.FIREBASE_PROJECT_ID || "maple-educators-app",
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "maple-educators-app.firebasestorage.app",
-  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || "782200920015",
-  appId: process.env.FIREBASE_APP_ID || "1:782200920015:web:7c87d1cb8868e7e02024ba",
-  measurementId: process.env.FIREBASE_MEASUREMENT_ID || "G-E4TB3CLH62"
+  apiKey: process.env.FIREBASE_API_KEY || 'AIzaSyDyL_aadGzyozNjU6QKoRgHjJ_jxlwWJxU',
+  authDomain:
+    process.env.FIREBASE_AUTH_DOMAIN || `${FALLBACK_PROJECT_ID}.firebaseapp.com`,
+  projectId: FALLBACK_PROJECT_ID,
+  // IMPORTANT: for the Admin SDK this MUST be a real GCS bucket, e.g. "your-project-id.appspot.com"
+  storageBucket: FALLBACK_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || '782200920015',
+  appId: process.env.FIREBASE_APP_ID || '1:782200920015:web:7c87d1cb8868e7e02024ba',
+  measurementId: process.env.FIREBASE_MEASUREMENT_ID || 'G-E4TB3CLH62',
 };
 
 /**
@@ -103,10 +110,12 @@ if (!admin.apps.length) {
   }
 }
 
-// Firestore & Storage instances (bucket uses app default from initializeApp)
+// Firestore & Storage instances
 const db = admin.firestore();
 const storage = admin.storage();
-const bucket = storage.bucket();
+// Explicitly use the configured bucket name (supports both .appspot.com and .firebasestorage.app)
+const bucketName = process.env.FIREBASE_STORAGE_BUCKET || firebaseConfig.storageBucket;
+const bucket = storage.bucket(bucketName);
 
 module.exports = {
   admin,

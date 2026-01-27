@@ -64,7 +64,7 @@
         <!-- Post Stats -->
         <div class="d-flex justify-content-between align-items-center mt-3 border-top border-bottom pt-2 pb-2">
           <span class="text-muted small likes-count"><%= post.likes || 0 %> Likes</span>
-          <span class="text-muted small comment-count"><%= post.comments || 0 %> Comments</span>
+          <span class="text-muted small comment-count"><%= (post.comments && Array.isArray(post.comments) ? post.comments.length : post.commentCount) || 0 %> Comments</span>
         </div>
 
         <!-- Action Buttons -->

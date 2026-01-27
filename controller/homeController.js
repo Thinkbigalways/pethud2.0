@@ -24,12 +24,19 @@ async function showHome(req, res, next) {
         .limit(50)
         .get();
 
-      posts = postsSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        // Convert Firestore timestamps to JavaScript dates
-        created_at: doc.data().created_at?.toDate ? doc.data().created_at.toDate() : new Date(),
-      }));
+      posts = postsSnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          // Convert Firestore timestamps to JavaScript dates
+          created_at: data.created_at?.toDate ? data.created_at.toDate() : new Date(),
+          // Add comment count (comments is an array)
+          commentCount: Array.isArray(data.comments) ? data.comments.length : 0,
+          // Ensure likes is an array for count
+          likeCount: Array.isArray(data.likes) ? data.likes.length : 0,
+        };
+      });
     } catch (err) {
       console.error('Error fetching posts:', err);
       // If there's an error (e.g., no index), just use empty array
