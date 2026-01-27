@@ -89,7 +89,7 @@
                       <div class="d-flex align-items-center gap-2">
                         <span class="text-muted small"><small><%= new Date(c.created_at).toLocaleString() %></small></span>
                         <% if (c.can_delete) { %>
-                          <a href="#" class="delete-comment text-decoration-none fw-bold text-muted small" data-comment-id="<%- c.id %>">
+                          <a href="#" class="delete-comment text-decoration-none fw-bold text-muted small" data-comment-id="<%- c.id %>" data-post-id="<%= post.id %>">
                             <span class="small">Delete</span>
                           </a>
                         <% } %>
@@ -342,10 +342,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target.closest('.delete-comment')) {
       const link = e.target.closest('.delete-comment');
       const commentId = link.getAttribute('data-comment-id');
-      if (!commentId) return;
+      // Get postId from button's data attribute or from post element
+      const buttonPostId = link.getAttribute('data-post-id') || postId;
+      if (!commentId) {
+        console.error('No comment ID found');
+        return;
+      }
+      if (!buttonPostId) {
+        console.error('No post ID found');
+        return;
+      }
       if (!confirm('Delete this comment?')) return;
       try {
-        const res = await fetch(`/posts/comment/${commentId}?postId=${encodeURIComponent(postId)}`, { method: 'DELETE' });
+        const res = await fetch(`/posts/comment/${encodeURIComponent(commentId)}?postId=${encodeURIComponent(buttonPostId)}`, { method: 'DELETE' });
         if (!res.ok) throw new Error('Network error deleting comment');
         const data = await res.json();
         if (data.success) {

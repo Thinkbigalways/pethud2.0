@@ -306,10 +306,19 @@ document.body.addEventListener('click', async e => {
   const commentId = target.dataset.commentId;
   const postId = target.dataset.postId;
 
+  if (!commentId) {
+    console.error('No comment ID found');
+    return;
+  }
+  if (!postId) {
+    console.error('No post ID found');
+    return;
+  }
+
   if (!confirm('Delete this comment?')) return;
 
   try {
-    const res = await fetch(`/posts/comment/${commentId}?postId=${encodeURIComponent(postId)}`, { method: 'DELETE' });
+    const res = await fetch(`/posts/comment/${encodeURIComponent(commentId)}?postId=${encodeURIComponent(postId)}`, { method: 'DELETE' });
     const data = await res.json();
     if (data.success) {
       // ✅ Directly reload comments instead of simulating button click

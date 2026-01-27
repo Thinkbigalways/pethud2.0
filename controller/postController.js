@@ -233,8 +233,17 @@ async function getComments(req, res) {
         }
       }
 
+      // For old comments without IDs, create a stable identifier using user_id + created_at
+      // This allows us to find and delete them later
+      let commentId = c.id;
+      if (!commentId) {
+        // Create a stable ID from user_id and created_at for old comments
+        const stableId = `${c.user_id}_${createdAtIso || createdAt || index}`;
+        commentId = stableId;
+      }
+
       return {
-        id: c.id || String(index),
+        id: commentId,
         user_id: c.user_id,
         username: c.username,
         profile_pic: c.profile_pic || null,
@@ -329,21 +338,57 @@ async function deleteComment(req, res) {
     const comments = postData.comments || [];
     
     // Find the comment to delete by ID
-    const commentIndex = comments.findIndex(comment => {
-      // Match by id if it exists, otherwise fallback to matching by user_id + created_at
-      if (comment.id) {
-        return comment.id === commentId;
+    let commentIndex = -1;
+    let commentToDelete = null;
+    
+    // First, try to find by exact ID match (for new comments with IDs)
+    commentIndex = comments.findIndex(comment => {
+      if (comment.id && comment.id === commentId) {
+        return true;
       }
-      // Fallback for old comments without IDs
-      return comment.user_id === userId && String(comment.created_at) === commentId;
+      return false;
     });
+    
+    // If not found by ID, try fallback for old comments
+    // The frontend might send an ID like "user_id_createdAt" for old comments
+    if (commentIndex === -1) {
+      commentIndex = comments.findIndex(comment => {
+        // For old comments without stored IDs, reconstruct the ID and match
+        if (!comment.id && comment.user_id === userId) {
+          const commentCreatedAt = comment.created_at;
+          let createdAtStr = '';
+          
+          // Handle both ISO string and Firestore Timestamp
+          if (typeof commentCreatedAt === 'string') {
+            createdAtStr = commentCreatedAt;
+          } else if (commentCreatedAt && typeof commentCreatedAt.toDate === 'function') {
+            createdAtStr = commentCreatedAt.toDate().toISOString();
+          } else if (commentCreatedAt) {
+            createdAtStr = String(commentCreatedAt);
+          }
+          
+          // Try matching the reconstructed ID
+          const reconstructedId = `${comment.user_id}_${createdAtStr}`;
+          return reconstructedId === commentId;
+        }
+        return false;
+      });
+    }
 
     if (commentIndex === -1) {
-      return res.json({ success: false, message: 'Comment not found' });
+      console.error('Comment not found. CommentId:', commentId, 'UserId:', userId, 'PostId:', postId);
+      console.error('Available comments:', comments.map((c, idx) => ({ 
+        index: idx, 
+        id: c.id, 
+        user_id: c.user_id, 
+        hasId: !!c.id,
+        created_at: c.created_at
+      })));
+      return res.json({ success: false, message: 'Comment not found. Please refresh the page and try again.' });
     }
 
     // Verify the user owns this comment
-    const commentToDelete = comments[commentIndex];
+    commentToDelete = comments[commentIndex];
     if (commentToDelete.user_id !== userId) {
       return res.json({ success: false, message: 'Unauthorized: You can only delete your own comments' });
     }
