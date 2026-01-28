@@ -6,3 +6,42 @@ body {
 a {
   color: #00B7FF;
 }
+
+/* -----------------------------
+   Post media (images/videos)
+   ----------------------------- */
+
+/* Responsive grid for post media */
+.post-media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.5rem;
+}
+
+/* Make a single item span full width */
+.post-media-grid.single {
+  grid-template-columns: 1fr;
+}
+
+.post-media-item {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  background: #000; /* helps videos look clean while loading */
+}
+
+.post-media-item img,
+.post-media-item video {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
+
+/* Keep videos looking consistent in feed */
+.post-media-item video {
+  max-height: 520px; /* prevents huge tall videos */
+  object-fit: contain; /* show full frame without cropping */
+  background: #000;
+}

@@ -45,12 +45,16 @@
 
     <!-- Media -->
     <% if (post.media && post.media.length > 0) { %>
-        <div class="mb-2 d-flex flex-wrap gap-2">
+        <div class="mb-2 post-media-grid <%= post.media.length === 1 ? 'single' : '' %>">
         <% post.media.forEach(url => { %>
             <% if(url.match(/\.(mp4|mov|avi)$/i)) { %>
-            <video src="<%= url %>" controls width="300" class="rounded"></video>
+            <div class="post-media-item">
+              <video src="<%= url %>" controls playsinline preload="metadata"></video>
+            </div>
             <% } else { %>
-            <img src="<%= url %>" class="img-fluid rounded" width="300" alt="Post media">
+            <div class="post-media-item">
+              <img src="<%= url %>" class="img-fluid" alt="Post media">
+            </div>
             <% } %>
         <% }) %>
         </div>
