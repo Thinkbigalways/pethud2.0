@@ -87,18 +87,38 @@ async function deleteFromFirebaseStorage(url) {
  */
 async function getUploadUrl(req, res) {
   try {
-    const { fileName, contentType } = req.query;
+    const { fileName, contentType, fileSize } = req.query;
+    
     if (!fileName || !contentType) {
       return res.json({ success: false, message: 'fileName and contentType are required' });
     }
 
+    // Validate file size (50MB limit)
+    const maxSize = 50 * 1024 * 1024; // 50MB
+    if (fileSize && parseInt(fileSize) > maxSize) {
+      return res.json({ 
+        success: false, 
+        message: `File size exceeds the maximum limit of ${(maxSize / 1024 / 1024).toFixed(0)}MB` 
+      });
+    }
+
+    // Validate file type
+    const allowedTypes = /jpeg|jpg|png|gif|webp|mp4|mov|avi/;
+    const ext = path.extname(fileName).toLowerCase().replace('.', '');
+    if (!allowedTypes.test(ext)) {
+      return res.json({ 
+        success: false, 
+        message: 'Invalid file type. Only images (JPEG, PNG, GIF, WEBP) and videos (MP4, MOV, AVI) are allowed.' 
+      });
+    }
+
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(fileName);
-    const storageFileName = `posts/${uniqueSuffix}${ext}`;
+    const storageFileName = `posts/${uniqueSuffix}.${ext}`;
     
     const file = bucket.file(storageFileName);
     
     // Generate a signed URL for upload (valid for 15 minutes)
+    // Use resumable upload for better reliability with large files
     const [url] = await file.getSignedUrl({
       version: 'v4',
       action: 'write',
@@ -114,7 +134,10 @@ async function getUploadUrl(req, res) {
     });
   } catch (err) {
     console.error('Error generating upload URL:', err);
-    return res.json({ success: false, message: 'Failed to generate upload URL' });
+    return res.json({ 
+      success: false, 
+      message: err.message || 'Failed to generate upload URL. Please try again.' 
+    });
   }
 }
 

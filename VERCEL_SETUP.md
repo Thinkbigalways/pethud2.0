@@ -1,5 +1,7 @@
 # Vercel Deployment Setup
 
+This guide will help you deploy PetHub 2.0 to Vercel.
+
 ## Required Environment Variables
 
 To deploy on Vercel, you need to set the following environment variables in your Vercel project settings:
@@ -50,12 +52,52 @@ If you want to use different email credentials:
 - `PORT` - Default: `4000` (Vercel sets this automatically)
 - `NODE_ENV` - Default: `production` (Vercel sets this automatically)
 
+## Firebase Storage CORS Configuration (Required for Video Uploads)
+
+To enable direct browser uploads (especially for videos), you need to configure CORS on your Firebase Storage bucket.
+
+### Option 1: Using gcloud CLI (Recommended)
+
+1. Install [Google Cloud SDK](https://cloud.google.com/sdk/docs/install)
+2. Authenticate: `gcloud auth login`
+3. Set your project: `gcloud config set project YOUR_PROJECT_ID`
+4. Run the CORS configuration script:
+   ```bash
+   node configure-cors.js
+   ```
+
+### Option 2: Manual Configuration
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/storage/browser)
+2. Select your Firebase Storage bucket
+3. Click on "Configuration" tab
+4. Scroll to "CORS configuration"
+5. Click "Edit CORS configuration"
+6. Paste the following JSON:
+   ```json
+   [
+     {
+       "origin": ["*"],
+       "method": ["GET", "HEAD", "PUT", "POST", "DELETE"],
+       "responseHeader": ["Content-Type", "Access-Control-Allow-Origin"],
+       "maxAgeSeconds": 3600
+     }
+   ]
+   ```
+7. Click "Save"
+
+**Note:** For production, replace `"origin": ["*"]` with your specific domain:
+```json
+"origin": ["https://yourdomain.com", "https://www.yourdomain.com"]
+```
+
 ## Quick Setup Checklist
 
 1. ✅ Set `FIREBASE_SERVICE_ACCOUNT` environment variable in Vercel
-2. ✅ (Optional) Set `GMAIL_USER` and `GMAIL_APP_PASSWORD` if using different email
-3. ✅ (Optional) Set `JWT_SECRET` for production security
-4. ✅ Deploy!
+2. ✅ Configure CORS on Firebase Storage bucket (see above)
+3. ✅ (Optional) Set `GMAIL_USER` and `GMAIL_APP_PASSWORD` if using different email
+4. ✅ (Optional) Set `JWT_SECRET` for production security
+5. ✅ Deploy!
 
 ## Deployment Steps
 
