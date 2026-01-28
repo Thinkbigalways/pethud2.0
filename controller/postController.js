@@ -83,11 +83,47 @@ async function deleteFromFirebaseStorage(url) {
 }
 
 /**
- * Create a new post
+ * Generate signed upload URL for direct client uploads (for Vercel compatibility)
+ */
+async function getUploadUrl(req, res) {
+  try {
+    const { fileName, contentType } = req.query;
+    if (!fileName || !contentType) {
+      return res.json({ success: false, message: 'fileName and contentType are required' });
+    }
+
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(fileName);
+    const storageFileName = `posts/${uniqueSuffix}${ext}`;
+    
+    const file = bucket.file(storageFileName);
+    
+    // Generate a signed URL for upload (valid for 15 minutes)
+    const [url] = await file.getSignedUrl({
+      version: 'v4',
+      action: 'write',
+      expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+      contentType: contentType,
+    });
+
+    return res.json({ 
+      success: true, 
+      uploadUrl: url,
+      fileName: storageFileName,
+      publicUrl: `https://storage.googleapis.com/${bucket.name}/${storageFileName}`
+    });
+  } catch (err) {
+    console.error('Error generating upload URL:', err);
+    return res.json({ success: false, message: 'Failed to generate upload URL' });
+  }
+}
+
+/**
+ * Create a new post (accepts mediaUrls from client-side uploads)
  */
 async function createPost(req, res) {
   try {
-    const { content } = req.body;
+    const { content, mediaUrls } = req.body;
     const userId = req.user.id;
     const username = req.user.username;
 
@@ -95,16 +131,50 @@ async function createPost(req, res) {
       return res.redirect('/?error=Post content is required');
     }
 
-    // Upload files to Firebase Storage
-    const mediaUrls = [];
-    if (req.files && req.files.length > 0) {
+    // Handle legacy file uploads (for non-Vercel deployments)
+    let finalMediaUrls = [];
+    
+    // Parse mediaUrls if it's a JSON string
+    let parsedMediaUrls = null;
+    if (typeof mediaUrls === 'string') {
+      try {
+        parsedMediaUrls = JSON.parse(mediaUrls);
+      } catch (e) {
+        // If parsing fails, treat as single URL
+        parsedMediaUrls = mediaUrls ? [mediaUrls] : [];
+      }
+    } else if (Array.isArray(mediaUrls)) {
+      parsedMediaUrls = mediaUrls;
+    }
+    
+    if (parsedMediaUrls && parsedMediaUrls.length > 0) {
+      // Client-side uploads: URLs are already provided
+      finalMediaUrls = parsedMediaUrls.filter(url => url && url.trim() !== '');
+    } else if (req.files && req.files.length > 0) {
+      // Server-side uploads (legacy, for local dev)
       for (const file of req.files) {
         try {
           const publicUrl = await uploadToFirebaseStorage(file, 'posts');
-          mediaUrls.push(publicUrl);
+          finalMediaUrls.push(publicUrl);
         } catch (error) {
           console.error('Error uploading file:', error);
           // Continue with other files even if one fails
+        }
+      }
+    }
+
+    // Make uploaded files public (if they were uploaded via signed URLs)
+    if (finalMediaUrls.length > 0) {
+      for (const url of finalMediaUrls) {
+        try {
+          // Extract file path from URL
+          const urlParts = url.split('/');
+          const filePath = urlParts.slice(-2).join('/'); // posts/filename.ext
+          const fileRef = bucket.file(filePath);
+          await fileRef.makePublic();
+        } catch (error) {
+          console.error('Error making file public:', error);
+          // Continue even if making public fails
         }
       }
     }
@@ -114,7 +184,7 @@ async function createPost(req, res) {
       user_id: userId,
       username: username,
       content: content.trim(),
-      media: mediaUrls,
+      media: finalMediaUrls,
       likes: [],
       comments: [],
       created_at: FieldValue.serverTimestamp(),
@@ -441,6 +511,7 @@ async function viewPost(req, res) {
 
 module.exports = {
   uploadMedia,
+  getUploadUrl,
   createPost,
   deletePost,
   likePost,

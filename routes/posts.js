@@ -4,8 +4,16 @@ var router = express.Router();
 var postController = require('../controller/postController');
 var authenticateToken = require("../middlewares/auth");
 
-// Create post: wrap multer so upload errors are caught and shown as redirect (not 500)
+// Get upload URL for direct client uploads (for Vercel compatibility)
+router.get('/upload-url', authenticateToken, postController.getUploadUrl);
+
+// Create post: support both client-side uploads (mediaUrls) and server-side uploads (files)
 router.post('/create', authenticateToken, function(req, res, next) {
+  // If mediaUrls are provided, skip multer (client-side uploads)
+  if (req.body.mediaUrls) {
+    return postController.createPost(req, res, next);
+  }
+  // Otherwise, use multer for server-side uploads (legacy, local dev)
   postController.uploadMedia(req, res, function(err) {
     if (err) {
       const msg = err.code === 'LIMIT_FILE_SIZE' ? 'File too large (max 50MB)' :
