@@ -36,21 +36,32 @@ lerna-debug.log*
 .Trashes
 ehthumbs.db
 Thumbs.db
+desktop.ini
 *.swp
 *.swo
 *~
 
 # IDE files
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
 .idea/
 *.sublime-project
 *.sublime-workspace
 *.code-workspace
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
 
 # Temporary files
 tmp/
 temp/
 *.tmp
+*.temp
+*.bak
 restart.txt
 
 # Build files
@@ -100,36 +111,3 @@ google-cloud-sdk/
 
 # CORS configuration temp files
 cors-config.json
-
-# Setup scripts output
-*.log
-
-# OS-specific files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-desktop.ini
-
-# Editor directories and files
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-.idea
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# Temporary files
-*.tmp
-*.temp
-*.bak
-*.swp
-*~

@@ -66,9 +66,10 @@ A social media platform for pet lovers built with Node.js, Express, Firebase, an
    ```bash
    npm run dev
    ```
+   Or: `npm start` (uses `PORT` from env, default 3000). On macOS you can use `./run-pethub.sh` to install deps and start.
 
 6. **Open your browser:**
-   Navigate to `http://localhost:4000`
+   Navigate to `http://localhost:4000` (or the port set by `PORT`)
 
 ## Project Structure
 
@@ -95,10 +96,12 @@ pethud2.0/
 ├── utils/               # Utility functions
 │   ├── firestoreHelpers.js
 │   └── mailer.js
-├── public/              # Static assets
+├── public/              # Static assets (only these are served; do not duplicate under project root)
 │   ├── images/
 │   └── stylesheets/
-└── server.js            # Entry point
+├── setup-cors.js        # One-time CORS setup for Firebase Storage
+├── configure-cors.js    # Alternative CORS setup (requires gcloud CLI)
+└── bin/www              # Server entry (npm start)
 ```
 
 ## Environment Variables

@@ -115,9 +115,15 @@
     font-size: 18px;
   }
   .notif-menu {
-    width: 300px;
-    max-height: 400px;
+    width: min(300px, calc(100vw - 2rem));
+    max-height: min(400px, 70vh);
     overflow-y: auto;
+  }
+  @media (max-width: 575.98px) {
+    .notif-menu {
+      width: calc(100vw - 2rem);
+      max-width: 320px;
+    }
   }
   /* Make notification items wrap */
   #notificationItems .dropdown-item {

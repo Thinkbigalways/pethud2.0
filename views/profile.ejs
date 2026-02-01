@@ -75,12 +75,12 @@
     </div>
   </div>
 
-  <div class="container profile-info">
-    <h3 class="fw-bold">
+  <div class="container profile-info px-3">
+    <h3 class="fw-bold mb-1">
       @<%= profileUser.username %>
     </h3>
-    <p class="text-muted mb-1"><%= profileUser.bio || "🐾 Pet Lover" %></p>
-    <div class="d-flex justify-content-center gap-2 mb-2" id="friendship-buttons">
+    <p class="text-muted mb-2 small"><%= profileUser.bio || "🐾 Pet Lover" %></p>
+    <div class="d-flex flex-wrap justify-content-center gap-2 mb-2" id="friendship-buttons">
       <% if (user && user.id !== profileUser.id) { %>
         <% if (friendStatus === 'none') { %>
           <button id="addFriendBtn" class="btn btn-primary" data-friend-id="<%= profileUser.id %>">
@@ -128,7 +128,7 @@
     </ul>
   </div>
 
-  <div class="container pb-5">
+  <div class="container pb-5 px-2 px-sm-3">
     <div class="tab-content">
       <div class="tab-pane fade show active" id="posts">
         <%- include('partials/profile-posts') %>

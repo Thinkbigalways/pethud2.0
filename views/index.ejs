@@ -1,17 +1,17 @@
 <%- include('bootstrap/header') %>
 <%- include('bootstrap/header-nav', { user: user }) %>
 
-<div class="py-3 bg-light">
-<div class="container-fluid">
+<div class="py-3 py-md-4 bg-light min-vh-100">
+<div class="container-fluid px-2 px-sm-3">
   <% if (typeof error !== 'undefined' && error) { %>
-  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+  <div class="alert alert-danger alert-dismissible fade show mx-2 mx-sm-0" role="alert">
     <%= error %>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
   </div>
   <% } %>
-  <div class="row g-4">
+  <div class="row g-3 g-md-4">
     
-    <!-- LEFT SIDEBAR -->
+    <!-- LEFT SIDEBAR (hidden on mobile) -->
     <div class="col-lg-3 d-none d-lg-block">
       <div class="bg-white p-3 rounded shadow-sm sticky-top" style="top: 82px;">
         <ul class="sidebar nav flex-column">
@@ -27,18 +27,18 @@
     </div>
     
     <!-- MAIN FEED -->
-    <div class="col-lg-6">
+    <div class="col-12 col-lg-6">
 
       <!-- Create Post -->
       <div class="card border-0 shadow-sm mb-3">
-        <div class="card-body">
-          <div class="d-flex mb-3">
-            <img src="<%= user.profile_pic || '/images/paw.jpg' %>" class="rounded-circle border me-2" alt="Profile" style="width:40px; height:40px; object-fit:cover;">
-            <div class="form-control rounded-pill" data-bs-toggle="modal" data-bs-target="#createPostModal" style="cursor:pointer;"><span class="text-muted">What's on your mind?</span></div>
+        <div class="card-body p-3 p-sm-4">
+          <div class="d-flex mb-2 mb-sm-3 align-items-center">
+            <img src="<%= user.profile_pic || '/images/paw.jpg' %>" class="rounded-circle border me-2 flex-shrink-0" alt="Profile" style="width:40px; height:40px; object-fit:cover;">
+            <div class="form-control rounded-pill py-2" data-bs-toggle="modal" data-bs-target="#createPostModal" style="cursor:pointer;"><span class="text-muted small text-truncate d-block">What's on your mind?</span></div>
           </div>
-          <div class="d-flex justify-content-around">
-            <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#createPostModal"><i class="fas fa-image text-success me-2"></i> Photo/Video</button>
-            <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#createPostModal"><i class="fas fa-smile text-warning me-2"></i> Feeling</button>
+          <div class="d-flex justify-content-around gap-1 flex-wrap">
+            <button class="btn btn-light btn-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#createPostModal"><i class="fas fa-image text-success me-1 me-sm-2"></i><span class="d-none d-sm-inline">Photo/Video</span></button>
+            <button class="btn btn-light btn-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#createPostModal"><i class="fas fa-smile text-warning me-1 me-sm-2"></i><span class="d-none d-sm-inline">Feeling</span></button>
           </div>
         </div>
       </div>
@@ -53,7 +53,7 @@
 
     </div>
     
-    <!-- RIGHT SIDEBAR -->
+    <!-- RIGHT SIDEBAR (hidden on mobile) -->
     <div class="col-lg-3 d-none d-lg-block">
       <div class="sidebar bg-white p-3 rounded shadow-sm mb-3">
         <h6 class="fw-bold">Suggestions</h6>
@@ -93,9 +93,9 @@
 </div>
 </div>
 
-<!-- Create Post Modal -->
+<!-- Create Post Modal (fullscreen on mobile) -->
 <div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
+  <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
     <div class="modal-content">
 
       <!-- Modal Header -->

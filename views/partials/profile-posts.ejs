@@ -2,7 +2,7 @@
   <% posts.forEach(post => { %>
     <!-- Post Card -->
     <div class="card border-0 shadow-sm mb-3 postCard" data-post-id="<%= post.id %>">
-      <div class="card-body">
+      <div class="card-body p-3 p-sm-4">
         
         <!-- User Info Header -->
         <div class="d-flex align-items-center justify-content-between mb-2">
@@ -89,9 +89,9 @@
       </div>
     </div>
 
-    <!-- Comment Modal -->
+    <!-- Comment Modal (fullscreen on mobile) -->
     <div class="modal fade" id="commentModal-<%= post.id %>" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-dialog modal-dialog-centered modal-lg modal-fullscreen-sm-down">
         <div class="modal-content">
           
           <!-- Modal Header -->
@@ -108,24 +108,18 @@
             </div>
 
             <!-- Add Comment Form -->
-            <form class="add-comment-form mt-3" data-post-id="<%= post.id %>">
-              <div class="input-group">
-                <input type="text" 
-                       name="comment" 
-                       class="form-control" 
-                       placeholder="Write a comment..." 
-                       required>
-                <button class="btn btn-dark" type="submit">Post</button>
-              </div>
+            <form class="add-comment-form mt-3 d-flex gap-2 flex-nowrap" data-post-id="<%= post.id %>">
+              <input type="text" name="comment" class="form-control flex-grow-1" placeholder="Write a comment..." required>
+              <button class="btn btn-dark flex-shrink-0 px-3" type="submit">Post</button>
             </form>
           </div>
         </div>
       </div>
     </div>
 
-<!-- Share Modal -->
+<!-- Share Modal (fullscreen on mobile) -->
 <div class="modal fade" id="shareModal-<%= post.id %>" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
+  <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
     <div class="modal-content shadow-lg rounded-3 border-0">
 
       <!-- Header -->
@@ -252,7 +246,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     try {
       const res = await fetch(`/posts/${postId}/comments`);
-      const comments = await res.json();
+      const data = await res.json();
+      const comments = Array.isArray(data.comments) ? data.comments : [];
       
       if (comments.length > 0) {
         listEl.innerHTML = comments.map(c => `
@@ -339,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!confirm('Delete this comment?')) return;
 
     try {
-      const res = await fetch(`/posts/comment/${commentId}`, { 
+      const res = await fetch(`/posts/comment/${encodeURIComponent(commentId)}?postId=${encodeURIComponent(postId)}`, { 
         method: 'DELETE', 
         headers: { 'Accept': 'application/json' } 
       });

@@ -1,24 +1,239 @@
+/* =============================
+   Base & responsive layout
+   ============================= */
 body {
-  padding: 50px;
+  padding: 0;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+@media (min-width: 992px) {
+  body { padding-top: 0; }
 }
 
 a {
   color: #00B7FF;
 }
 
-/* -----------------------------
-   Post media (images/videos)
-   ----------------------------- */
+/* Main content area: comfortable padding on all screens */
+.container-fluid.py-3,
+.py-3.bg-light .container-fluid {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  max-width: 100%;
+}
 
-/* Responsive grid for post media */
+@media (min-width: 576px) {
+  .container-fluid.py-3,
+  .py-3.bg-light .container-fluid {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .container-fluid.py-3,
+  .py-3.bg-light .container-fluid {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+/* Feed column: full width on mobile, centered max on large */
+.row.g-4 {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.row.g-4 > [class*="col-"] {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+@media (min-width: 576px) {
+  .row.g-4 > [class*="col-"] {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}
+
+/* =============================
+   Cards & post layout
+   ============================= */
+.card {
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.card-body {
+  padding: 1rem;
+}
+
+@media (min-width: 576px) {
+  .card-body { padding: 1.25rem; }
+}
+
+/* Post action buttons: stack on very small, then row */
+.d-flex.justify-content-between.gap-2.mt-3 {
+  flex-wrap: wrap;
+  gap: 0.5rem !important;
+}
+
+.d-flex.gap-2.mt-3 .btn,
+.d-flex.gap-2.mt-3 button {
+  min-height: 44px; /* touch target */
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* =============================
+   Comment section (inline & modal)
+   ============================= */
+.comments-container {
+  max-height: 320px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.comments-list {
+  max-height: 280px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Add comment row: full width input + button */
+.add-comment.d-flex,
+.add-comment-form .input-group {
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
+.add-comment input[name="comment"],
+.add-comment-form .form-control {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.add-comment .post-comment-btn,
+.add-comment-form .btn {
+  flex-shrink: 0;
+  min-width: 70px;
+  min-height: 38px;
+}
+
+/* Comment items: wrap long text */
+.comments-container .d-flex.bg-light,
+.comments-list .d-flex {
+  word-break: break-word;
+}
+
+.comments-container .small,
+.comments-list .small {
+  word-wrap: break-word;
+}
+
+/* =============================
+   Modals: full-width on small screens
+   ============================= */
+.modal-dialog {
+  margin: 0.5rem;
+  max-width: calc(100% - 1rem);
+}
+
+.modal-content {
+  border-radius: 0.5rem;
+  border: none;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.modal-body {
+  padding: 1rem;
+  max-height: calc(100vh - 180px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.modal-header {
+  padding: 0.75rem 1rem;
+  flex-shrink: 0;
+}
+
+.modal-footer {
+  padding: 0.75rem 1rem;
+  flex-shrink: 0;
+}
+
+@media (min-width: 576px) {
+  .modal-dialog {
+    margin: 1.75rem auto;
+    max-width: 500px;
+  }
+  .modal-dialog.modal-lg {
+    max-width: 800px;
+  }
+  .modal-body {
+    max-height: 70vh;
+  }
+}
+
+/* Full-screen feel for comment modals on mobile */
+@media (max-width: 575.98px) {
+  .modal-dialog.modal-lg {
+    margin: 0;
+    max-width: 100%;
+    min-height: 100vh;
+  }
+  .modal-dialog.modal-lg .modal-content {
+    min-height: 100vh;
+    border-radius: 0;
+  }
+  .modal-dialog.modal-lg .modal-body {
+    max-height: none;
+    flex: 1 1 auto;
+  }
+}
+
+/* =============================
+   Create post modal
+   ============================= */
+#createPostModal .modal-body {
+  padding: 1rem;
+}
+
+#createPostModal .form-control {
+  font-size: 1rem; /* prevents zoom on iOS */
+}
+
+@media (max-width: 575.98px) {
+  #createPostModal .modal-dialog {
+    margin: 0;
+    max-width: 100%;
+    min-height: 100vh;
+  }
+  #createPostModal .modal-content {
+    min-height: 100vh;
+    border-radius: 0;
+  }
+  #createPostModal .modal-footer .btn {
+    min-height: 44px;
+  }
+}
+
+/* =============================
+   Post media (images/videos)
+   ============================= */
 .post-media-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 0.5rem;
 }
 
-/* Make a single item span full width */
+@media (min-width: 576px) {
+  .post-media-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+}
+
 .post-media-grid.single {
   grid-template-columns: 1fr;
 }
@@ -27,7 +242,7 @@ a {
   width: 100%;
   overflow: hidden;
   border-radius: 0.5rem;
-  background: #000; /* helps videos look clean while loading */
+  background: #000;
 }
 
 .post-media-item img,
@@ -39,9 +254,91 @@ a {
   border-radius: 0.5rem;
 }
 
-/* Keep videos looking consistent in feed */
 .post-media-item video {
-  max-height: 520px; /* prevents huge tall videos */
-  object-fit: contain; /* show full frame without cropping */
+  max-height: 50vh;
+  object-fit: contain;
   background: #000;
+}
+
+@media (min-width: 768px) {
+  .post-media-item video {
+    max-height: 520px;
+  }
+}
+
+/* =============================
+   Navbar adjustments (mobile)
+   ============================= */
+.navbar .container-fluid {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.navbar-brand {
+  font-size: 1rem;
+}
+
+.navbar-brand img {
+  height: 32px;
+}
+
+@media (min-width: 576px) {
+  .navbar-brand img { height: 40px; }
+}
+
+/* =============================
+   Footer
+   ============================= */
+footer .container {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+footer .d-flex.justify-content-end {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+footer .form-text {
+  font-size: 0.875rem;
+}
+
+/* =============================
+   Profile page
+   ============================= */
+@media (max-width: 575.98px) {
+  .cover-photo {
+    height: 180px !important;
+  }
+  .profile-pic {
+    width: 100px !important;
+    height: 100px !important;
+    bottom: -50px !important;
+  }
+  .profile-info {
+    margin-top: 56px !important;
+  }
+  .profile-info h3 {
+    font-size: 1.25rem;
+  }
+}
+
+/* =============================
+   Touch-friendly & accessibility
+   ============================= */
+@media (hover: none) {
+  .btn:not(.disabled),
+  .dropdown-toggle,
+  .nav-link,
+  a[data-bs-toggle="modal"] {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* Prevent horizontal scroll */
+img, video, .card, .modal-content {
+  max-width: 100%;
 }
