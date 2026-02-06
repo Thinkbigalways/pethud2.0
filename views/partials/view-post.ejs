@@ -1,230 +1,247 @@
 <%- include('../bootstrap/header') %>
-<%- include('../bootstrap/header-nav', { user: user }) %>
+  <%- include('../bootstrap/header-nav', { user: user }) %>
 
-<div class="py-3 py-md-4 bg-light min-vh-100">
-  <div class="container-fluid px-2 px-sm-3">
-    <div class="row g-3 g-md-4">
-      <!-- LEFT SIDEBAR -->
-      <div class="col-lg-3 d-none d-lg-block">
-        <div class="bg-white p-3 rounded shadow-sm sticky-top" style="top: 82px;">
-          <ul class="sidebar nav flex-column">
-            <li class="nav-item"><a class="nav-link active" href="/"><i class="fas fa-home me-3"></i>Feeds</a></li>
-            <li class="nav-item"><a class="nav-link" href="/@<%- user.username %>#posts"><i class="fas fa-sticky-note me-3"></i>My posts</a></li>
-            <li class="nav-item"><a class="nav-link" href="/@<%- user.username %>#friends"><i class="fas fa-user-friends me-3"></i>My friends</a></li>
-            <li class="nav-item"><a class="nav-link" href="/marketplace"><i class="fas fa-store me-3"></i>Marketplace</a></li>
-            <li class="nav-item mt-2 mb-2 border-top"></li>
-            <li class="nav-item"><a class="nav-link" href="/settings"><i class="fas fa-gear me-3"></i>Settings</a></li>
-            <li class="nav-item"><a class="nav-link" href="/auth/logout"><i class="fas fa-sign-out-alt me-3"></i>Logout</a></li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- MAIN FEED -->
-      <div class="col-12 col-lg-6">
-        <div class="card border-0 shadow-sm mb-3" data-post-id="<%= post.id %>">
-          <div class="card-body p-3 p-sm-4">
-            <!-- User Info -->
-            <div class="d-flex align-items-center mb-2">
-              <a href="/@<%- post.username %>">
-                <img src="<%- post.profile_pic || '/images/paw.jpg' %>" class="rounded-circle border me-2" style="width:40px; height:40px; object-fit:cover;">
-              </a>
-              <div class="d-flex flex-column">
-                <a href="/@<%- post.username %>" class="text-decoration-none text-dark">
-                  <span class="fw-bold">@<%= post.username %></span>
-                </a>
-                <a href="/posts/view-post/<%- post.id %>" class="text-decoration-none text-muted small">
-                  <%= post.created_at ? new Date(post.created_at).toLocaleString() : 'Just now' %>
-                </a>
-              </div>
+    <div class="py-3 py-md-4 bg-light min-vh-100">
+      <div class="container-fluid px-2 px-sm-3">
+        <div class="row g-3 g-md-4">
+          <!-- LEFT SIDEBAR -->
+          <div class="col-lg-3 d-none d-lg-block">
+            <div class="bg-white p-3 rounded shadow-sm sticky-top" style="top: 82px;">
+              <ul class="sidebar nav flex-column">
+                <li class="nav-item"><a class="nav-link active" href="/"><i class="fas fa-home me-3"></i>Feeds</a></li>
+                <li class="nav-item"><a class="nav-link" href="/@<%- user.username %>#posts"><i
+                      class="fas fa-sticky-note me-3"></i>My posts</a></li>
+                <li class="nav-item"><a class="nav-link" href="/@<%- user.username %>#friends"><i
+                      class="fas fa-user-friends me-3"></i>My friends</a></li>
+                <li class="nav-item"><a class="nav-link" href="/marketplace"><i
+                      class="fas fa-store me-3"></i>Marketplace</a></li>
+                <li class="nav-item mt-2 mb-2 border-top"></li>
+                <li class="nav-item"><a class="nav-link" href="/settings"><i class="fas fa-gear me-3"></i>Settings</a>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="/auth/logout"><i
+                      class="fas fa-sign-out-alt me-3"></i>Logout</a></li>
+              </ul>
             </div>
+          </div>
 
-            <!-- Content -->
-            <p><%= post.content %></p>
-
-            <!-- Media -->
-            <% if (post.media?.length) { %>
-              <div class="mb-2 post-media-grid <%= post.media.length === 1 ? 'single' : '' %>">
-                <% post.media.forEach(url => { %>
-                  <% if(url.match(/\.(mp4|mov|avi)$/i)) { %>
-                    <div class="post-media-item">
-                      <video src="<%= url %>" controls playsinline preload="metadata"></video>
-                    </div>
-                  <% } else { %>
-                    <div class="post-media-item">
-                      <img src="<%= url %>" class="img-fluid" alt="Post media">
-                    </div>
-                  <% } %>
-                <% }) %>
-              </div>
-            <% } %>
-
-            <!-- Likes + Actions -->
-            <div class="d-flex justify-content-between align-items-center mt-2 border-top border-bottom pt-2 pb-2">
-              <span class="text-muted small likes-count"><%= post.likeCount || 0 %> Likes</span>
-              <span class="text-muted small comment-count"><%= post.commentCount || 0 %> Comments</span>
-            </div>
-
-            <div class="d-flex justify-content-between gap-2 mt-3">
-              <button class="btn btn-light btn-sm like-btn flex-fill">
-                  <i class="<%= post.is_liked ? 'fas text-primary' : 'far' %> fa-thumbs-up me-2"></i> Like
-              </button>
-              <button class="btn btn-light btn-sm comment-btn flex-fill" data-bs-toggle="modal" data-bs-target="#commentModal-<%= post.id %>">
-                  <i class="far fa-comment me-2"></i> Comment
-              </button>
-              <button class="btn btn-light btn-sm flex-fill" data-bs-toggle="modal" 
-        data-bs-target="#shareModal-<%= post.id %>">
-                  <i class="fas fa-share me-2"></i> Share
-              </button>
-            </div>
-
-            <!-- Comments Section -->
-            <div class="mt-3 comments-container">
-              <% if (comments?.length) { %>
-                <% comments.forEach(c => { %>
-                  <div class="d-flex mb-2 align-items-start comment-item">
-                    <a href="/@<%- c.username %>">
-                      <img src="<%= c.profile_pic || '/images/paw.jpg' %>" class="rounded-circle border me-2" style="width:40px; height:40px; object-fit:cover;" alt="<%= c.username %>">
+          <!-- MAIN FEED -->
+          <div class="col-12 col-lg-6">
+            <div class="card border-0 shadow-sm mb-3" data-post-id="<%= post.id %>">
+              <div class="card-body p-3 p-sm-4">
+                <!-- User Info -->
+                <div class="d-flex align-items-center mb-2">
+                  <a href="/@<%- post.username %>">
+                    <img src="<%- post.profile_pic || '/images/paw.jpg' %>" class="rounded-circle border me-2"
+                      style="width:40px; height:40px; object-fit:cover;">
+                  </a>
+                  <div class="d-flex flex-column">
+                    <a href="/@<%- post.username %>" class="text-decoration-none text-dark">
+                      <span class="fw-bold">@<%= post.username %></span>
                     </a>
-                    <div class="flex-fill">
-                      <div class="d-flex flex-column bg-light rounded-4 p-2">
-                        <p class="m-0 fw-bold small">@<%= c.username %></p>
-                        <p class="m-0 small"><%= c.comment %></p>
-                      </div>
-                      <div class="d-flex align-items-center gap-2">
-                        <span class="text-muted small"><small><%= new Date(c.created_at).toLocaleString() %></small></span>
-                        <% if (c.can_delete) { %>
-                          <a href="#" class="delete-comment text-decoration-none fw-bold text-muted small" data-comment-id="<%- c.id %>" data-post-id="<%= post.id %>">
-                            <span class="small">Delete</span>
-                          </a>
-                        <% } %>
-                      </div>
-                    </div>
+                    <a href="/posts/view-post/<%- post.id %>" class="text-decoration-none text-muted small">
+                      <%= post.created_at ? new Date(post.created_at).toLocaleString() : 'Just now' %>
+                    </a>
                   </div>
-                <% }) %>
-              <% } else { %>
-                <p class="text-muted small no-comments-message">No comments yet</p>
-              <% } %>
-            </div>
+                </div>
 
-            <!-- Add Comment -->
-            <div class="add-comment mt-2 d-flex gap-2 flex-nowrap" data-post-id="<%= post.id %>">
-              <input type="text" name="comment" class="form-control form-control-sm flex-grow-1" placeholder="Write a comment..." required>
-              <button class="btn btn-sm btn-dark post-comment-btn flex-shrink-0" type="button">Post</button>
+                <!-- Content -->
+                <p>
+                  <%= post.content %>
+                </p>
+
+                <!-- Media -->
+                <% if (post.media?.length) { %>
+                  <div class="mb-2 post-media-grid <%= post.media.length === 1 ? 'single' : '' %>">
+                    <% post.media.forEach(url=> { %>
+                      <% if(url.match(/\.(mp4|mov|avi)$/i)) { %>
+                        <div class="post-media-item">
+                          <video src="<%= url %>" controls playsinline preload="metadata"></video>
+                        </div>
+                        <% } else { %>
+                          <div class="post-media-item">
+                            <img src="<%= url %>" class="img-fluid" alt="Post media">
+                          </div>
+                          <% } %>
+                            <% }) %>
+                  </div>
+                  <% } %>
+
+                    <!-- Likes + Actions -->
+                    <div
+                      class="d-flex justify-content-between align-items-center mt-2 border-top border-bottom pt-2 pb-2">
+                      <span class="text-muted small likes-count">
+                        <%= post.likeCount || 0 %> Likes
+                      </span>
+                      <span class="text-muted small comment-count">
+                        <%= post.commentCount || 0 %> Comments
+                      </span>
+                    </div>
+
+                    <div class="d-flex justify-content-between gap-2 mt-3">
+                      <button class="btn btn-light btn-sm like-btn flex-fill">
+                        <i class="<%= post.is_liked ? 'fas text-primary' : 'far' %> fa-thumbs-up me-2"></i> Like
+                      </button>
+                      <button class="btn btn-light btn-sm comment-btn flex-fill" data-bs-toggle="modal"
+                        data-bs-target="#commentModal-<%= post.id %>">
+                        <i class="far fa-comment me-2"></i> Comment
+                      </button>
+                      <button class="btn btn-light btn-sm flex-fill" data-bs-toggle="modal"
+                        data-bs-target="#shareModal-<%= post.id %>">
+                        <i class="fas fa-share me-2"></i> Share
+                      </button>
+                    </div>
+
+                    <!-- Comments Section -->
+                    <div class="mt-3 comments-container">
+                      <% if (comments?.length) { %>
+                        <% comments.forEach(c=> { %>
+                          <div class="d-flex mb-2 align-items-start comment-item">
+                            <a href="/@<%- c.username %>">
+                              <img src="<%= c.profile_pic || '/images/paw.jpg' %>" class="rounded-circle border me-2"
+                                style="width:40px; height:40px; object-fit:cover;" alt="<%= c.username %>">
+                            </a>
+                            <div class="flex-fill">
+                              <div class="d-flex flex-column bg-light rounded-4 p-2">
+                                <p class="m-0 fw-bold small">@<%= c.username %>
+                                </p>
+                                <p class="m-0 comment-text">
+                                  <%= c.comment %>
+                                </p>
+                              </div>
+                              <div class="d-flex align-items-center gap-2">
+                                <span class="text-muted small"><small>
+                                    <%= new Date(c.created_at).toLocaleString() %>
+                                  </small></span>
+                                <% if (c.can_delete) { %>
+                                  <a href="#" class="delete-comment text-decoration-none fw-bold text-muted small"
+                                    data-comment-id="<%- c.id %>" data-post-id="<%= post.id %>">
+                                    <span class="small">Delete</span>
+                                  </a>
+                                  <% } %>
+                              </div>
+                            </div>
+                          </div>
+                          <% }) %>
+                            <% } else { %>
+                              <p class="text-muted small no-comments-message">No comments yet</p>
+                              <% } %>
+                    </div>
+
+                    <!-- Add Comment -->
+                    <div class="add-comment mt-2 d-flex gap-2 flex-nowrap" data-post-id="<%= post.id %>">
+                      <input type="text" name="comment" class="form-control form-control-sm flex-grow-1"
+                        placeholder="Write a comment..." required>
+                      <button class="btn btn-sm btn-dark post-comment-btn flex-shrink-0" type="button">Post</button>
+                    </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT SIDEBAR -->
+          <div class="col-lg-3 d-none d-lg-block">
+            <div class="sidebar bg-white p-3 rounded shadow-sm mb-3">
+              <h6 class="fw-bold">Suggestions</h6>
+            </div>
+            <div class="sidebar bg-white p-3 rounded shadow-sm">
+              <h6 class="fw-bold">Trending</h6>
+              <p class="mb-1">#pet</p>
+              <p class="mb-1">#cat</p>
+              <p class="mb-1">#dog_lover</p>
             </div>
           </div>
         </div>
       </div>
-
-      <!-- RIGHT SIDEBAR -->
-      <div class="col-lg-3 d-none d-lg-block">
-        <div class="sidebar bg-white p-3 rounded shadow-sm mb-3">
-          <h6 class="fw-bold">Suggestions</h6>
-        </div>
-        <div class="sidebar bg-white p-3 rounded shadow-sm">
-          <h6 class="fw-bold">Trending</h6>
-          <p class="mb-1">#pet</p>
-          <p class="mb-1">#cat</p>
-          <p class="mb-1">#dog_lover</p>
-        </div>
-      </div>
     </div>
-  </div>
-</div>
 
-<!-- Share Modal (fullscreen on mobile) -->
-<div class="modal fade" id="shareModal-<%= post.id %>" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
-    <div class="modal-content shadow-lg rounded-3 border-0">
+    <!-- Share Modal (fullscreen on mobile) -->
+    <div class="modal fade" id="shareModal-<%= post.id %>" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+        <div class="modal-content shadow-lg rounded-3 border-0">
 
-      <!-- Header -->
-      <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title fw-bold text-primary">
-          <i class="fas fa-share-alt me-2"></i> Share This Post
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-
-      <!-- Body -->
-      <div class="modal-body">
-
-        <!-- Post Link -->
-        <div class="mb-3">
-          <label class="form-label fw-semibold small text-secondary">Direct Post Link</label>
-          <div class="input-group">
-            <input type="text" id="postLink-<%= post.id %>" 
-                   class="form-control border-primary-subtle"
-                   value="<%= 'https://pethudl.com/posts/view-post/' + post.id %>" readonly>
-            <button class="btn btn-outline-primary copy-link-btn" 
-                    data-post-id="<%= post.id %>" type="button">
-              <i class="fas fa-copy me-1"></i> Copy
-            </button>
+          <!-- Header -->
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title fw-bold text-primary">
+              <i class="fas fa-share-alt me-2"></i> Share This Post
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
-        </div>
 
-        <!-- Social Buttons -->
-        <div class="d-flex flex-wrap gap-2 justify-content-center">
-          <a href="https://www.instagram.com/" 
-             target="_blank" class="btn btn-sm d-flex align-items-center px-3" 
-             style="background:#e4405f; color:#fff;" 
-             title="Instagram doesn’t allow direct link sharing. Copy the link manually.">
-            <i class="fab fa-instagram me-2"></i> Instagram
-          </a>
+          <!-- Body -->
+          <div class="modal-body">
 
-          <a href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent('https://pethudl.com/posts/view-post/' + post.id) %>" 
-            target="_blank" class="btn btn-sm d-flex align-items-center px-3" 
-             style="background:#1877f2; color:#fff;">
-            <i class="fab fa-facebook-f me-2"></i> Facebook
-          </a>
-          
-          <a href="https://x.com/intent/tweet?url=<%= encodeURIComponent('https://pethudl.com/posts/view-post/' + post.id) %>&text=<%= encodeURIComponent('Check this out!') %>" 
-            target="_blank" class="btn btn-sm d-flex align-items-center px-3" 
-            style="background:#000; color:#fff;">
-            <i class="fab fa-x-twitter me-2"></i> X
-          </a>
-          
-          <a href="https://www.tiktok.com/share/video?url=<%= encodeURIComponent('https://pethudl.com/posts/view-post/' + post.id) %>" 
-             target="_blank" class="btn btn-sm d-flex align-items-center px-3" 
-             style="background:#000000; color:#fff;">
-            <i class="fab fa-tiktok me-2"></i> TikTok
-          </a>
-          
-          <a href="https://www.youtube.com/" 
-             target="_blank" class="btn btn-sm d-flex align-items-center px-3" 
-             style="background:#ff0000; color:#fff;" 
-             title="YouTube doesn’t allow direct post sharing. Copy the link manually.">
-            <i class="fab fa-youtube me-2"></i> YouTube
-          </a>
+            <!-- Post Link -->
+            <div class="mb-3">
+              <label class="form-label fw-semibold small text-secondary">Direct Post Link</label>
+              <div class="input-group">
+                <input type="text" id="postLink-<%= post.id %>" class="form-control border-primary-subtle"
+                  value="<%= 'https://pethudl.com/posts/view-post/' + post.id %>" readonly>
+                <button class="btn btn-outline-primary copy-link-btn" data-post-id="<%= post.id %>" type="button">
+                  <i class="fas fa-copy me-1"></i> Copy
+                </button>
+              </div>
+            </div>
 
-          <a href="https://wa.me/?text=<%= encodeURIComponent('Check this out: https://pethudl.com/posts/view-post/' + post.id) %>" 
-             target="_blank" class="btn btn-sm d-flex align-items-center px-3" 
-             style="background:#25d366; color:#fff;">
-            <i class="fab fa-whatsapp me-2"></i> WhatsApp
-          </a>
-        </div>
+            <!-- Social Buttons -->
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+              <a href="https://www.instagram.com/" target="_blank" class="btn btn-sm d-flex align-items-center px-3"
+                style="background:#e4405f; color:#fff;"
+                title="Instagram doesn’t allow direct link sharing. Copy the link manually.">
+                <i class="fab fa-instagram me-2"></i> Instagram
+              </a>
 
-        <!-- Info -->
-        <div class="alert alert-info small mt-4 mb-0">
-          <i class="fas fa-info-circle me-1"></i>
-          Instagram & YouTube don’t support direct web sharing. Copy the link and paste it manually in their apps.
+              <a href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent('https://pethudl.com/posts/view-post/' + post.id) %>"
+                target="_blank" class="btn btn-sm d-flex align-items-center px-3"
+                style="background:#1877f2; color:#fff;">
+                <i class="fab fa-facebook-f me-2"></i> Facebook
+              </a>
+
+              <a href="https://x.com/intent/tweet?url=<%= encodeURIComponent('https://pethudl.com/posts/view-post/' + post.id) %>&text=<%= encodeURIComponent('Check this out!') %>"
+                target="_blank" class="btn btn-sm d-flex align-items-center px-3" style="background:#000; color:#fff;">
+                <i class="fab fa-x-twitter me-2"></i> X
+              </a>
+
+              <a href="https://www.tiktok.com/share/video?url=<%= encodeURIComponent('https://pethudl.com/posts/view-post/' + post.id) %>"
+                target="_blank" class="btn btn-sm d-flex align-items-center px-3"
+                style="background:#000000; color:#fff;">
+                <i class="fab fa-tiktok me-2"></i> TikTok
+              </a>
+
+              <a href="https://www.youtube.com/" target="_blank" class="btn btn-sm d-flex align-items-center px-3"
+                style="background:#ff0000; color:#fff;"
+                title="YouTube doesn’t allow direct post sharing. Copy the link manually.">
+                <i class="fab fa-youtube me-2"></i> YouTube
+              </a>
+
+              <a href="https://wa.me/?text=<%= encodeURIComponent('Check this out: https://pethudl.com/posts/view-post/' + post.id) %>"
+                target="_blank" class="btn btn-sm d-flex align-items-center px-3"
+                style="background:#25d366; color:#fff;">
+                <i class="fab fa-whatsapp me-2"></i> WhatsApp
+              </a>
+            </div>
+
+            <!-- Info -->
+            <div class="alert alert-info small mt-4 mb-0">
+              <i class="fas fa-info-circle me-1"></i>
+              Instagram & YouTube don’t support direct web sharing. Copy the link and paste it manually in their apps.
+            </div>
+          </div>
+
         </div>
       </div>
-
     </div>
-  </div>
-</div>
 
-<%- include('../bootstrap/footer') %>
+    <%- include('../bootstrap/footer') %>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  // small helpers
-  const escapeHtml = s => s == null ? '' : String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
-  const formatDate = d => { try { return new Date(d).toLocaleString(); } catch { return 'Just now'; } };
+      <script>
+        document.addEventListener('DOMContentLoaded', () => {
+          // small helpers
+          const escapeHtml = s => s == null ? '' : String(s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
+          const formatDate = d => { try { return new Date(d).toLocaleString(); } catch { return 'Just now'; } };
 
-  // build comment HTML safely
-  const createCommentHTML = c => {
-    const created_at = c.created_at || new Date().toISOString();
-    return `
+          // build comment HTML safely
+          const createCommentHTML = c => {
+            const created_at = c.created_at || new Date().toISOString();
+            return `
       <div class="d-flex mb-2 align-items-start comment-item">
         <a href="/@${escapeHtml(c.username)}">
           <img src="${escapeHtml(c.profile_pic || '/images/paw.jpg')}" class="rounded-circle border me-2" style="width:40px; height:40px; object-fit:cover;">
@@ -232,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="flex-fill">
           <div class="d-flex flex-column bg-light rounded-4 p-2">
             <p class="m-0 fw-bold small">@${escapeHtml(c.username)}</p>
-            <p class="m-0 small">${escapeHtml(c.comment)}</p>
+            <p class="m-0 comment-text">${escapeHtml(c.comment)}</p>
           </div>
           <div class="d-flex align-items-center gap-2">
             <span class="text-muted small"><small>${formatDate(created_at)}</small></span>
@@ -241,203 +258,203 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>
     `;
-  };
+          };
 
-  // fallback: request server-side comments list and render (useful if POST doesn't return the new comment)
-  async function fetchCommentsAndRender(postId, container) {
-    try {
-      const res = await fetch(`/posts/${postId}/comments`);
-      if (!res.ok) throw new Error('Failed to fetch comments');
-      const data = await res.json();
-      if (Array.isArray(data.comments)) {
-        container.innerHTML = '';
-        if (data.comments.length === 0) {
-          container.innerHTML = '<p class="text-muted small no-comments-message">No comments yet</p>';
-          return;
-        }
-        data.comments.forEach(c => container.insertAdjacentHTML('beforeend', createCommentHTML(c)));
-      } else if (typeof data.html === 'string') {
-        container.innerHTML = data.html;
-      } else {
-        console.warn('Unexpected comments payload:', data);
-      }
-    } catch (err) {
-      console.warn('Could not re-fetch comments:', err);
-    }
-  }
-
-  // update counters safely
-  const updateCommentCount = (postEl, delta) => {
-    const el = postEl.querySelector('.comment-count');
-    if (!el) return;
-    const m = el.textContent.match(/(\d+)/);
-    let n = m ? parseInt(m[1], 10) : 0;
-    n = Math.max(0, n + delta);
-    el.textContent = `${n} Comments`;
-  };
-  const updateLikesText = (postEl, newCount) => {
-    const el = postEl.querySelector('.likes-count');
-    if (!el) return;
-    el.textContent = `${newCount} Likes`;
-  };
-
-  // Single delegated click handler for comments, delete and likes
-  document.body.addEventListener('click', async (e) => {
-    const postEl = e.target.closest('[data-post-id]');
-    if (!postEl) return;
-    const postId = postEl.getAttribute('data-post-id');
-
-    // ---------- Add comment ----------
-    if (e.target.closest('.post-comment-btn')) {
-      const btn = e.target.closest('.post-comment-btn');
-      const input = postEl.querySelector("input[name='comment']");
-      const text = input?.value?.trim();
-      if (!text) return;
-      btn.disabled = true;
-      try {
-        const res = await fetch(`/posts/${postId}/comment`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ comment: text })
-        });
-        // handle non-JSON or redirect responses gracefully
-        if (!res.ok) {
-          const txt = await res.text().catch(()=>null);
-          throw new Error('Server error: ' + (txt || res.status));
-        }
-        const data = await res.json();
-
-        if (data.success) {
-          const container = postEl.querySelector('.comments-container');
-
-          if (data.comment) {
-            // server returned the new comment object
-            container.querySelector('.no-comments-message')?.remove();
-            container.insertAdjacentHTML('beforeend', createCommentHTML(data.comment));
-            updateCommentCount(postEl, 1);
-          } else if (data.comment_html) {
-            // server returned ready HTML
-            container.querySelector('.no-comments-message')?.remove();
-            container.insertAdjacentHTML('beforeend', data.comment_html);
-            updateCommentCount(postEl, 1);
-          } else {
-            // fallback: re-fetch the full comments (requires /posts/:id/comments)
-            await fetchCommentsAndRender(postId, container);
-            // try to update count if server returned it
-            if (typeof data.commentCount === 'number') {
-              postEl.querySelector('.comment-count').textContent = `${data.commentCount} Comments`;
+          // fallback: request server-side comments list and render (useful if POST doesn't return the new comment)
+          async function fetchCommentsAndRender(postId, container) {
+            try {
+              const res = await fetch(`/posts/${postId}/comments`);
+              if (!res.ok) throw new Error('Failed to fetch comments');
+              const data = await res.json();
+              if (Array.isArray(data.comments)) {
+                container.innerHTML = '';
+                if (data.comments.length === 0) {
+                  container.innerHTML = '<p class="text-muted small no-comments-message">No comments yet</p>';
+                  return;
+                }
+                data.comments.forEach(c => container.insertAdjacentHTML('beforeend', createCommentHTML(c)));
+              } else if (typeof data.html === 'string') {
+                container.innerHTML = data.html;
+              } else {
+                console.warn('Unexpected comments payload:', data);
+              }
+            } catch (err) {
+              console.warn('Could not re-fetch comments:', err);
             }
           }
-          input.value = '';
-        } else {
-          alert(data.message || 'Failed to post comment');
-          console.warn('Post comment response:', data);
-        }
-      } catch (err) {
-        console.error('Error posting comment:', err);
-        alert('Error posting comment (check console/network tab).');
-      } finally {
-        btn.disabled = false;
-      }
-      return;
-    }
 
-    // ---------- Delete comment ----------
-    if (e.target.closest('.delete-comment')) {
-      const link = e.target.closest('.delete-comment');
-      const commentId = link.getAttribute('data-comment-id');
-      // Get postId from button's data attribute or from post element
-      const buttonPostId = link.getAttribute('data-post-id') || postId;
-      if (!commentId) {
-        console.error('No comment ID found');
-        return;
-      }
-      if (!buttonPostId) {
-        console.error('No post ID found');
-        return;
-      }
-      if (!confirm('Delete this comment?')) return;
-      try {
-        const res = await fetch(`/posts/comment/${encodeURIComponent(commentId)}?postId=${encodeURIComponent(buttonPostId)}`, { method: 'DELETE' });
-        if (!res.ok) throw new Error('Network error deleting comment');
-        const data = await res.json();
-        if (data.success) {
-          const removed = link.closest('.comment-item');
-          removed?.remove();
-          const container = postEl.querySelector('.comments-container');
-          if (!container.querySelector('.comment-item')) {
-            container.innerHTML = '<p class="text-muted small no-comments-message">No comments yet</p>';
-          }
-          updateCommentCount(postEl, -1);
-        } else {
-          alert(data.message || 'Failed to delete comment');
-        }
-      } catch (err) {
-        console.error('Error deleting comment:', err);
-        alert('Error deleting comment (check console).');
-      }
-      return;
-    }
+          // update counters safely
+          const updateCommentCount = (postEl, delta) => {
+            const el = postEl.querySelector('.comment-count');
+            if (!el) return;
+            const m = el.textContent.match(/(\d+)/);
+            let n = m ? parseInt(m[1], 10) : 0;
+            n = Math.max(0, n + delta);
+            el.textContent = `${n} Comments`;
+          };
+          const updateLikesText = (postEl, newCount) => {
+            const el = postEl.querySelector('.likes-count');
+            if (!el) return;
+            el.textContent = `${newCount} Likes`;
+          };
 
-    // ---------- Like button (delegated) ----------
-    if (e.target.closest('.like-btn')) {
-      const btn = e.target.closest('.like-btn');
-      btn.disabled = true;
-      try {
-        const res = await fetch(`/posts/${postId}/like`, { method: 'POST' });
-        if (!res.ok) throw new Error('Network error liking post');
-        const data = await res.json();
-        if (data.success) {
-          const countEl = postEl.querySelector('.likes-count');
-          const m = countEl.textContent.match(/(\d+)/);
-          let current = m ? parseInt(m[1], 10) : 0;
-          if (data.liked) {
-            current++;
-            const i = btn.querySelector('i');
-            i.classList.remove('far');
-            i.classList.add('fas', 'text-primary');
-          } else {
-            current = Math.max(0, current - 1);
-            const i = btn.querySelector('i');
-            i.classList.remove('fas', 'text-primary');
-            i.classList.add('far');
-          }
-          updateLikesText(postEl, current);
-        } else {
-          alert(data.message || 'Failed to like/unlike');
-        }
-      } catch (err) {
-        console.error('Error liking post:', err);
-      } finally {
-        btn.disabled = false;
-      }
-      return;
-    }
-  });
+          // Single delegated click handler for comments, delete and likes
+          document.body.addEventListener('click', async (e) => {
+            const postEl = e.target.closest('[data-post-id]');
+            if (!postEl) return;
+            const postId = postEl.getAttribute('data-post-id');
 
-  // optional: submit comment by pressing Enter (no shift)
-  document.body.addEventListener('keydown', (ev) => {
-    if (ev.key === 'Enter' && !ev.shiftKey && ev.target && ev.target.matches("input[name='comment']")) {
-      ev.preventDefault();
-      ev.target.closest('.add-comment')?.querySelector('.post-comment-btn')?.click();
-    }
-  });
+            // ---------- Add comment ----------
+            if (e.target.closest('.post-comment-btn')) {
+              const btn = e.target.closest('.post-comment-btn');
+              const input = postEl.querySelector("input[name='comment']");
+              const text = input?.value?.trim();
+              if (!text) return;
+              btn.disabled = true;
+              try {
+                const res = await fetch(`/posts/${postId}/comment`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ comment: text })
+                });
+                // handle non-JSON or redirect responses gracefully
+                if (!res.ok) {
+                  const txt = await res.text().catch(() => null);
+                  throw new Error('Server error: ' + (txt || res.status));
+                }
+                const data = await res.json();
 
-    // COPY LINK
-document.body.addEventListener('click', e => {
-  const btn = e.target.closest('.copy-link-btn');
-  if (!btn) return;
+                if (data.success) {
+                  const container = postEl.querySelector('.comments-container');
 
-  const postId = btn.dataset.postId;
-  const input = document.getElementById(`postLink-${postId}`);
+                  if (data.comment) {
+                    // server returned the new comment object
+                    container.querySelector('.no-comments-message')?.remove();
+                    container.insertAdjacentHTML('beforeend', createCommentHTML(data.comment));
+                    updateCommentCount(postEl, 1);
+                  } else if (data.comment_html) {
+                    // server returned ready HTML
+                    container.querySelector('.no-comments-message')?.remove();
+                    container.insertAdjacentHTML('beforeend', data.comment_html);
+                    updateCommentCount(postEl, 1);
+                  } else {
+                    // fallback: re-fetch the full comments (requires /posts/:id/comments)
+                    await fetchCommentsAndRender(postId, container);
+                    // try to update count if server returned it
+                    if (typeof data.commentCount === 'number') {
+                      postEl.querySelector('.comment-count').textContent = `${data.commentCount} Comments`;
+                    }
+                  }
+                  input.value = '';
+                } else {
+                  alert(data.message || 'Failed to post comment');
+                  console.warn('Post comment response:', data);
+                }
+              } catch (err) {
+                console.error('Error posting comment:', err);
+                alert('Error posting comment (check console/network tab).');
+              } finally {
+                btn.disabled = false;
+              }
+              return;
+            }
 
-  input.select();
-  input.setSelectionRange(0, 99999); // for mobile
-  navigator.clipboard.writeText(input.value);
+            // ---------- Delete comment ----------
+            if (e.target.closest('.delete-comment')) {
+              const link = e.target.closest('.delete-comment');
+              const commentId = link.getAttribute('data-comment-id');
+              // Get postId from button's data attribute or from post element
+              const buttonPostId = link.getAttribute('data-post-id') || postId;
+              if (!commentId) {
+                console.error('No comment ID found');
+                return;
+              }
+              if (!buttonPostId) {
+                console.error('No post ID found');
+                return;
+              }
+              if (!confirm('Delete this comment?')) return;
+              try {
+                const res = await fetch(`/posts/comment/${encodeURIComponent(commentId)}?postId=${encodeURIComponent(buttonPostId)}`, { method: 'DELETE' });
+                if (!res.ok) throw new Error('Network error deleting comment');
+                const data = await res.json();
+                if (data.success) {
+                  const removed = link.closest('.comment-item');
+                  removed?.remove();
+                  const container = postEl.querySelector('.comments-container');
+                  if (!container.querySelector('.comment-item')) {
+                    container.innerHTML = '<p class="text-muted small no-comments-message">No comments yet</p>';
+                  }
+                  updateCommentCount(postEl, -1);
+                } else {
+                  alert(data.message || 'Failed to delete comment');
+                }
+              } catch (err) {
+                console.error('Error deleting comment:', err);
+                alert('Error deleting comment (check console).');
+              }
+              return;
+            }
 
-  btn.textContent = "Copied!";
-  setTimeout(() => btn.textContent = "Copy", 2000);
-});
+            // ---------- Like button (delegated) ----------
+            if (e.target.closest('.like-btn')) {
+              const btn = e.target.closest('.like-btn');
+              btn.disabled = true;
+              try {
+                const res = await fetch(`/posts/${postId}/like`, { method: 'POST' });
+                if (!res.ok) throw new Error('Network error liking post');
+                const data = await res.json();
+                if (data.success) {
+                  const countEl = postEl.querySelector('.likes-count');
+                  const m = countEl.textContent.match(/(\d+)/);
+                  let current = m ? parseInt(m[1], 10) : 0;
+                  if (data.liked) {
+                    current++;
+                    const i = btn.querySelector('i');
+                    i.classList.remove('far');
+                    i.classList.add('fas', 'text-primary');
+                  } else {
+                    current = Math.max(0, current - 1);
+                    const i = btn.querySelector('i');
+                    i.classList.remove('fas', 'text-primary');
+                    i.classList.add('far');
+                  }
+                  updateLikesText(postEl, current);
+                } else {
+                  alert(data.message || 'Failed to like/unlike');
+                }
+              } catch (err) {
+                console.error('Error liking post:', err);
+              } finally {
+                btn.disabled = false;
+              }
+              return;
+            }
+          });
 
-});
-</script>
+          // optional: submit comment by pressing Enter (no shift)
+          document.body.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Enter' && !ev.shiftKey && ev.target && ev.target.matches("input[name='comment']")) {
+              ev.preventDefault();
+              ev.target.closest('.add-comment')?.querySelector('.post-comment-btn')?.click();
+            }
+          });
+
+          // COPY LINK
+          document.body.addEventListener('click', e => {
+            const btn = e.target.closest('.copy-link-btn');
+            if (!btn) return;
+
+            const postId = btn.dataset.postId;
+            const input = document.getElementById(`postLink-${postId}`);
+
+            input.select();
+            input.setSelectionRange(0, 99999); // for mobile
+            navigator.clipboard.writeText(input.value);
+
+            btn.textContent = "Copied!";
+            setTimeout(() => btn.textContent = "Copy", 2000);
+          });
+
+        });
+      </script>

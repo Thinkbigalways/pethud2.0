@@ -8,7 +8,9 @@ body {
 }
 
 @media (min-width: 992px) {
-  body { padding-top: 0; }
+  body {
+    padding-top: 0;
+  }
 }
 
 a {
@@ -24,6 +26,7 @@ a {
 }
 
 @media (min-width: 576px) {
+
   .container-fluid.py-3,
   .py-3.bg-light .container-fluid {
     padding-left: 1rem;
@@ -32,6 +35,7 @@ a {
 }
 
 @media (min-width: 768px) {
+
   .container-fluid.py-3,
   .py-3.bg-light .container-fluid {
     padding-left: 1.5rem;
@@ -45,13 +49,13 @@ a {
   margin-right: 0;
 }
 
-.row.g-4 > [class*="col-"] {
+.row.g-4>[class*="col-"] {
   padding-left: 0.5rem;
   padding-right: 0.5rem;
 }
 
 @media (min-width: 576px) {
-  .row.g-4 > [class*="col-"] {
+  .row.g-4>[class*="col-"] {
     padding-left: 0.75rem;
     padding-right: 0.75rem;
   }
@@ -70,7 +74,9 @@ a {
 }
 
 @media (min-width: 576px) {
-  .card-body { padding: 1.25rem; }
+  .card-body {
+    padding: 1.25rem;
+  }
 }
 
 /* Post action buttons: stack on very small, then row */
@@ -81,7 +87,8 @@ a {
 
 .d-flex.gap-2.mt-3 .btn,
 .d-flex.gap-2.mt-3 button {
-  min-height: 44px; /* touch target */
+  min-height: 44px;
+  /* touch target */
   flex: 1 1 auto;
   min-width: 0;
 }
@@ -168,9 +175,11 @@ a {
     margin: 1.75rem auto;
     max-width: 500px;
   }
+
   .modal-dialog.modal-lg {
     max-width: 800px;
   }
+
   .modal-body {
     max-height: 70vh;
   }
@@ -183,10 +192,12 @@ a {
     max-width: 100%;
     min-height: 100vh;
   }
+
   .modal-dialog.modal-lg .modal-content {
     min-height: 100vh;
     border-radius: 0;
   }
+
   .modal-dialog.modal-lg .modal-body {
     max-height: none;
     flex: 1 1 auto;
@@ -201,7 +212,8 @@ a {
 }
 
 #createPostModal .form-control {
-  font-size: 1rem; /* prevents zoom on iOS */
+  font-size: 1rem;
+  /* prevents zoom on iOS */
 }
 
 @media (max-width: 575.98px) {
@@ -210,10 +222,12 @@ a {
     max-width: 100%;
     min-height: 100vh;
   }
+
   #createPostModal .modal-content {
     min-height: 100vh;
     border-radius: 0;
   }
+
   #createPostModal .modal-footer .btn {
     min-height: 44px;
   }
@@ -283,7 +297,9 @@ a {
 }
 
 @media (min-width: 576px) {
-  .navbar-brand img { height: 40px; }
+  .navbar-brand img {
+    height: 40px;
+  }
 }
 
 /* =============================
@@ -310,14 +326,17 @@ footer .form-text {
   .cover-photo {
     height: 180px !important;
   }
+
   .profile-pic {
     width: 100px !important;
     height: 100px !important;
     bottom: -50px !important;
   }
+
   .profile-info {
     margin-top: 56px !important;
   }
+
   .profile-info h3 {
     font-size: 1.25rem;
   }
@@ -327,6 +346,7 @@ footer .form-text {
    Touch-friendly & accessibility
    ============================= */
 @media (hover: none) {
+
   .btn:not(.disabled),
   .dropdown-toggle,
   .nav-link,
@@ -339,6 +359,41 @@ footer .form-text {
 }
 
 /* Prevent horizontal scroll */
-img, video, .card, .modal-content {
+img,
+video,
+.card,
+.modal-content {
   max-width: 100%;
+}
+
+/* =============================
+   Mobile Post Styling (Large)
+   ============================= */
+.comment-text {
+  font-size: 0.875rem;
+  /* default small */
+  word-wrap: break-word;
+}
+
+@media (max-width: 575.98px) {
+  .post-text {
+    font-size: 1.15rem;
+    /* Larger font for mobile */
+    line-height: 1.5;
+  }
+
+  .post-media-grid {
+    grid-template-columns: 1fr;
+    /* Full width images on mobile */
+  }
+
+  .comment-text {
+    font-size: 1rem;
+    /* Larger comments on mobile */
+  }
+
+  input[name="comment"] {
+    font-size: 16px !important;
+    /* Larger input text & prevent zoom */
+  }
 }
