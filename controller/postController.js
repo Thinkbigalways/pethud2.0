@@ -532,6 +532,51 @@ async function viewPost(req, res) {
   }
 }
 
+/**
+ * Share (Repost) a post
+ */
+async function sharePost(req, res) {
+  try {
+    const { postId } = req.params;
+    const userId = req.user.id;
+    const username = req.user.username;
+
+    const originalPostDoc = await db.collection(POSTS_COLLECTION).doc(postId).get();
+    
+    if (!originalPostDoc.exists) {
+      return res.status(404).json({ success: false, message: 'Original post not found' });
+    }
+
+    const originalPost = originalPostDoc.data();
+
+    // Create a new post referencing the original
+    // We'll prepend a "Shared from..." message to the content
+    // and copy the media.
+    
+    const newContent = `Shared from @${originalPost.username}: ${originalPost.content}`;
+    
+    const postData = {
+      user_id: userId,
+      username: username,
+      content: newContent,
+      media: originalPost.media || [], // Copy media URLs
+      likes: [],
+      comments: [],
+      created_at: FieldValue.serverTimestamp(),
+      updated_at: FieldValue.serverTimestamp(),
+      original_post_id: postId, // distinct field to track origin
+      is_shared: true
+    };
+
+    const newPostRef = await db.collection(POSTS_COLLECTION).add(postData);
+
+    return res.json({ success: true, newPostId: newPostRef.id });
+  } catch (err) {
+    console.error('Error sharing post:', err);
+    return res.status(500).json({ success: false, message: 'Failed to share post' });
+  }
+}
+
 module.exports = {
   uploadMedia,
   getUploadUrl,
@@ -542,4 +587,5 @@ module.exports = {
   addComment,
   deleteComment,
   viewPost,
+  sharePost,
 };
