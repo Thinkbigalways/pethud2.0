@@ -165,9 +165,10 @@
               </a>
 
               <!-- Instagram -->
-              <a href="https://www.instagram.com/" target="_blank"
+              <a href="https://www.instagram.com/create/story/?url=<%= encodeURIComponent('https://pethudl.com/posts/view-post/' + post.id) %>"
+                target="_blank"
                 class="btn btn-outline-danger rounded-circle p-0 d-flex align-items-center justify-content-center"
-                style="width: 45px; height: 45px; border-color: #e4405f; color: #e4405f;" title="Open Instagram">
+                style="width: 45px; height: 45px; border-color: #e4405f; color: #e4405f;" title="Share to Instagram">
                 <i class="fab fa-instagram"></i>
               </a>
 
@@ -179,12 +180,12 @@
                 <i class="fab fa-whatsapp"></i>
               </a>
 
-              <!-- Threads -->
-              <a href="https://www.threads.net/intent/post?text=<%= encodeURIComponent('https://pethudl.com/posts/view-post/' + post.id) %>"
+              <!-- X (Twitter) -->
+              <a href="https://x.com/intent/tweet?url=<%= encodeURIComponent('https://pethudl.com/posts/view-post/' + post.id) %>&text=<%= encodeURIComponent('Check this out!') %>"
                 target="_blank"
                 class="btn btn-outline-dark rounded-circle p-0 d-flex align-items-center justify-content-center"
                 style="width: 45px; height: 45px;">
-                <i class="fas fa-at"></i>
+                <i class="fab fa-x-twitter"></i>
               </a>
             </div>
 
