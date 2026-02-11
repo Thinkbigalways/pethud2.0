@@ -13,7 +13,7 @@ const upload = multer({
     const allowedTypes = /jpeg|jpg|png|gif|webp|mp4|mov|avi/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
-    
+
     if (mimetype && extname) {
       return cb(null, true);
     } else {
@@ -33,9 +33,9 @@ async function uploadToFirebaseStorage(file, folder = 'posts') {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     const ext = path.extname(file.originalname);
     const fileName = `${folder}/${uniqueSuffix}${ext}`;
-    
+
     const fileUpload = bucket.file(fileName);
-    
+
     const stream = fileUpload.createWriteStream({
       metadata: {
         contentType: file.mimetype,
@@ -73,7 +73,7 @@ async function deleteFromFirebaseStorage(url) {
     // Extract file path from URL
     const urlParts = url.split('/');
     const fileName = urlParts.slice(-2).join('/'); // Get folder/filename
-    
+
     await bucket.file(fileName).delete();
     return true;
   } catch (error) {
@@ -88,7 +88,7 @@ async function deleteFromFirebaseStorage(url) {
 async function getUploadUrl(req, res) {
   try {
     const { fileName, contentType, fileSize } = req.query;
-    
+
     if (!fileName || !contentType) {
       return res.json({ success: false, message: 'fileName and contentType are required' });
     }
@@ -96,9 +96,9 @@ async function getUploadUrl(req, res) {
     // Validate file size (50MB limit)
     const maxSize = 50 * 1024 * 1024; // 50MB
     if (fileSize && parseInt(fileSize) > maxSize) {
-      return res.json({ 
-        success: false, 
-        message: `File size exceeds the maximum limit of ${(maxSize / 1024 / 1024).toFixed(0)}MB` 
+      return res.json({
+        success: false,
+        message: `File size exceeds the maximum limit of ${(maxSize / 1024 / 1024).toFixed(0)}MB`
       });
     }
 
@@ -106,17 +106,17 @@ async function getUploadUrl(req, res) {
     const allowedTypes = /jpeg|jpg|png|gif|webp|mp4|mov|avi/;
     const ext = path.extname(fileName).toLowerCase().replace('.', '');
     if (!allowedTypes.test(ext)) {
-      return res.json({ 
-        success: false, 
-        message: 'Invalid file type. Only images (JPEG, PNG, GIF, WEBP) and videos (MP4, MOV, AVI) are allowed.' 
+      return res.json({
+        success: false,
+        message: 'Invalid file type. Only images (JPEG, PNG, GIF, WEBP) and videos (MP4, MOV, AVI) are allowed.'
       });
     }
 
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     const storageFileName = `posts/${uniqueSuffix}.${ext}`;
-    
+
     const file = bucket.file(storageFileName);
-    
+
     // Generate a signed URL for upload (valid for 15 minutes)
     // Use resumable upload for better reliability with large files
     const [url] = await file.getSignedUrl({
@@ -126,17 +126,17 @@ async function getUploadUrl(req, res) {
       contentType: contentType,
     });
 
-    return res.json({ 
-      success: true, 
+    return res.json({
+      success: true,
       uploadUrl: url,
       fileName: storageFileName,
       publicUrl: `https://storage.googleapis.com/${bucket.name}/${storageFileName}`
     });
   } catch (err) {
     console.error('Error generating upload URL:', err);
-    return res.json({ 
-      success: false, 
-      message: err.message || 'Failed to generate upload URL. Please try again.' 
+    return res.json({
+      success: false,
+      message: err.message || 'Failed to generate upload URL. Please try again.'
     });
   }
 }
@@ -156,7 +156,7 @@ async function createPost(req, res) {
 
     // Handle legacy file uploads (for non-Vercel deployments)
     let finalMediaUrls = [];
-    
+
     // Parse mediaUrls if it's a JSON string
     let parsedMediaUrls = null;
     if (typeof mediaUrls === 'string') {
@@ -169,7 +169,7 @@ async function createPost(req, res) {
     } else if (Array.isArray(mediaUrls)) {
       parsedMediaUrls = mediaUrls;
     }
-    
+
     if (parsedMediaUrls && parsedMediaUrls.length > 0) {
       // Client-side uploads: URLs are already provided
       finalMediaUrls = parsedMediaUrls.filter(url => url && url.trim() !== '');
@@ -429,11 +429,11 @@ async function deleteComment(req, res) {
 
     const postData = postDoc.data();
     const comments = postData.comments || [];
-    
+
     // Find the comment to delete by ID
     let commentIndex = -1;
     let commentToDelete = null;
-    
+
     // First, try to find by exact ID match (for new comments with IDs)
     commentIndex = comments.findIndex(comment => {
       if (comment.id && comment.id === commentId) {
@@ -441,7 +441,7 @@ async function deleteComment(req, res) {
       }
       return false;
     });
-    
+
     // If not found by ID, try fallback for old comments
     // The frontend might send an ID like "user_id_createdAt" for old comments
     if (commentIndex === -1) {
@@ -450,7 +450,7 @@ async function deleteComment(req, res) {
         if (!comment.id && comment.user_id === userId) {
           const commentCreatedAt = comment.created_at;
           let createdAtStr = '';
-          
+
           // Handle both ISO string and Firestore Timestamp
           if (typeof commentCreatedAt === 'string') {
             createdAtStr = commentCreatedAt;
@@ -459,7 +459,7 @@ async function deleteComment(req, res) {
           } else if (commentCreatedAt) {
             createdAtStr = String(commentCreatedAt);
           }
-          
+
           // Try matching the reconstructed ID
           const reconstructedId = `${comment.user_id}_${createdAtStr}`;
           return reconstructedId === commentId;
@@ -470,10 +470,10 @@ async function deleteComment(req, res) {
 
     if (commentIndex === -1) {
       console.error('Comment not found. CommentId:', commentId, 'UserId:', userId, 'PostId:', postId);
-      console.error('Available comments:', comments.map((c, idx) => ({ 
-        index: idx, 
-        id: c.id, 
-        user_id: c.user_id, 
+      console.error('Available comments:', comments.map((c, idx) => ({
+        index: idx,
+        id: c.id,
+        user_id: c.user_id,
         hasId: !!c.id,
         created_at: c.created_at
       })));
@@ -521,7 +521,13 @@ async function viewPost(req, res) {
     return res.render('posts/view-post', {
       title: 'View Post',
       user,
-      post: { id: postDoc.id, ...postData },
+      post: {
+        id: postDoc.id,
+        ...postData,
+        likeCount: Array.isArray(postData.likes) ? postData.likes.length : 0,
+        commentCount: Array.isArray(postData.comments) ? postData.comments.length : 0,
+        is_liked: user && postData.likes && postData.likes.includes(user.id),
+      },
     });
   } catch (err) {
     console.error('Error viewing post:', err);
@@ -542,7 +548,7 @@ async function sharePost(req, res) {
     const username = req.user.username;
 
     const originalPostDoc = await db.collection(POSTS_COLLECTION).doc(postId).get();
-    
+
     if (!originalPostDoc.exists) {
       return res.status(404).json({ success: false, message: 'Original post not found' });
     }
@@ -552,9 +558,9 @@ async function sharePost(req, res) {
     // Create a new post referencing the original
     // We'll prepend a "Shared from..." message to the content
     // and copy the media.
-    
+
     const newContent = `Shared from @${originalPost.username}: ${originalPost.content}`;
-    
+
     const postData = {
       user_id: userId,
       username: username,

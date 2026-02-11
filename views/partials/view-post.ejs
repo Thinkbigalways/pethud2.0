@@ -66,14 +66,17 @@
                   </div>
                   <% } %>
 
-                    <!-- Likes + Actions -->
                     <div
                       class="d-flex justify-content-between align-items-center mt-2 border-top border-bottom pt-2 pb-2">
                       <span class="text-muted small likes-count">
-                        <%= post.likeCount || 0 %> Likes
+                        <% let lCount=(post.likes && Array.isArray(post.likes)) ? post.likes.length :
+                          (parseInt(post.likeCount) || 0); %>
+                          <%= lCount> 0 ? lCount + ' Likes' : '' %>
                       </span>
                       <span class="text-muted small comment-count">
-                        <%= post.commentCount || 0 %> Comments
+                        <% let cCount=(post.comments && Array.isArray(post.comments)) ? post.comments.length :
+                          (parseInt(post.commentCount) || 0); %>
+                          <%= cCount %> Comments
                       </span>
                     </div>
 
@@ -292,7 +295,7 @@
           const updateLikesText = (postEl, newCount) => {
             const el = postEl.querySelector('.likes-count');
             if (!el) return;
-            el.textContent = `${newCount} Likes`;
+            el.textContent = newCount > 0 ? `${newCount} Likes` : '';
           };
 
           // Single delegated click handler for comments, delete and likes
