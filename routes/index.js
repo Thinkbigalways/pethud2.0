@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var authenticateToken = require("../middlewares/auth");
+var optionalAuthenticateToken = require("../middlewares/optionalAuth"); // Added this line
 
 var homeController = require('../controller/homeController');
 var profileController = require("../controller/profileController");
@@ -9,7 +10,8 @@ var searchController = require('../controller/searchController');
 var notificationsController = require('../controller/notificationsController');
 
 /* GET home page. */
-router.get(['/', '/home', '/index.html.var'], authenticateToken, homeController.showHome);
+// Use optionalAuthenticateToken so unauthenticated users can still view the feed
+router.get('/', optionalAuthenticateToken, homeController.showHome); // Modified this line to use optionalAuthenticateToken and simplified the path array
 
 /* GET profile page */
 router.get('/profile', authenticateToken, (req, res) => {
@@ -38,13 +40,20 @@ router.get(['/about-us'], (req, res) => {
 });
 
 /* Terms & Conditions Page */
-router.get(['/terms-conditions'], (req, res) => {
-  res.render('pages/terms-conditions', { title: 'Terms & Conditions' });
+router.get('/terms-conditions', function (req, res, next) {
+  res.render('pages/terms', { title: 'Terms & Conditions' });
 });
 
-/* Privacy Policy Page */
-router.get(['/privacy-policy'], (req, res) => {
-  res.render('pages/privacy-policy', { title: 'Privacy Policy' });
+router.get('/privacy-policy', function (req, res, next) {
+  res.render('pages/privacy', { title: 'Privacy Policy' });
+});
+
+/* GET raffles page. */
+router.get('/raffles', optionalAuthenticateToken, function (req, res, next) {
+  res.render('pages/raffles', {
+    title: 'Raffles and Giveaways',
+    user: req.user
+  });
 });
 
 module.exports = router;

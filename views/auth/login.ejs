@@ -1,234 +1,235 @@
 <%- include('../bootstrap/header') %>
-
-  <style>
-    /* Hero background with overlay */
-    body {
-      margin: 0;
-      padding: 0;
-      overflow-x: hidden;
-      position: relative;
-    }
-
-    .auth-hero-bg {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: url('/images/auth-hero.png');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      z-index: -2;
-      animation: fadeIn 1s ease-in;
-    }
-
-    .auth-hero-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.3) 100%);
-      z-index: -1;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
+  <%- include('../bootstrap/header-nav', { user: null }) %>
+    <style>
+      /* Hero background with overlay */
+      body {
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+        position: relative;
       }
 
-      to {
-        opacity: 1;
-      }
-    }
-
-    /* Floating emoji */
-    .emoji {
-      position: absolute;
-      font-size: 2.5rem;
-      opacity: 0.15;
-      animation: floatUp 18s linear infinite;
-      z-index: 1;
-    }
-
-    @keyframes floatUp {
-      from {
-        transform: translateY(100vh) rotate(0deg);
-      }
-
-      to {
-        transform: translateY(-120vh) rotate(360deg);
-      }
-    }
-
-    .toggle-password {
-      width: 42px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-    }
-
-    .tagline {
-      font-size: 3rem;
-      font-weight: 800;
-      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
-      margin-bottom: 1.5rem;
-      animation: slideInLeft 0.8s ease-out;
-    }
-
-    .subtitle {
-      font-size: 1.25rem;
-      text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
-      animation: slideInLeft 1s ease-out;
-    }
-
-    @keyframes slideInLeft {
-      from {
-        opacity: 0;
-        transform: translateX(-50px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    .auth-card {
-      backdrop-filter: blur(10px);
-      background: rgba(255, 255, 255, 0.95);
-      animation: slideInRight 0.8s ease-out;
-    }
-
-    @keyframes slideInRight {
-      from {
-        opacity: 0;
-        transform: translateX(50px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    /* Mobile background */
-    @media (max-width: 991px) {
       .auth-hero-bg {
-        background-image: url('/images/auth-hero-mobile.png');
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('/images/auth-hero.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        z-index: -2;
+        animation: fadeIn 1s ease-in;
       }
-    }
-  </style>
 
-  <!-- Hero Background -->
-  <div class="auth-hero-bg"></div>
-  <div class="auth-hero-overlay"></div>
+      .auth-hero-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.3) 100%);
+        z-index: -1;
+      }
 
-  <div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center position-relative">
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
 
-    <!-- Floating emojis -->
-    <div class="emoji" style="left: 10%; animation-delay: 0s;">🐾</div>
-    <div class="emoji" style="left: 25%; animation-delay: 4s;">🐶</div>
-    <div class="emoji" style="left: 45%; animation-delay: 8s;">🐱</div>
-    <div class="emoji" style="left: 65%; animation-delay: 12s;">🐦</div>
-    <div class="emoji" style="left: 80%; animation-delay: 16s;">🐰</div>
+        to {
+          opacity: 1;
+        }
+      }
 
-    <div class="row w-100 justify-content-center align-items-center">
+      /* Floating emoji */
+      .emoji {
+        position: absolute;
+        font-size: 2.5rem;
+        opacity: 0.15;
+        animation: floatUp 18s linear infinite;
+        z-index: 1;
+      }
 
-      <!-- Left side (branding/tagline) -->
-      <div class="col-lg-5 d-none d-lg-flex flex-column justify-content-center px-5 text-white">
-        <div class="mb-4">
-          <img src="/images/logo-black.svg" alt="Pethudl" height="70" style="filter: invert(1);" class="mb-3">
+      @keyframes floatUp {
+        from {
+          transform: translateY(100vh) rotate(0deg);
+        }
+
+        to {
+          transform: translateY(-120vh) rotate(360deg);
+        }
+      }
+
+      .toggle-password {
+        width: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+      }
+
+      .tagline {
+        font-size: 3rem;
+        font-weight: 800;
+        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+        margin-bottom: 1.5rem;
+        animation: slideInLeft 0.8s ease-out;
+      }
+
+      .subtitle {
+        font-size: 1.25rem;
+        text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+        animation: slideInLeft 1s ease-out;
+      }
+
+      @keyframes slideInLeft {
+        from {
+          opacity: 0;
+          transform: translateX(-50px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      .auth-card {
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.95);
+        animation: slideInRight 0.8s ease-out;
+      }
+
+      @keyframes slideInRight {
+        from {
+          opacity: 0;
+          transform: translateX(50px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      /* Mobile background */
+      @media (max-width: 991px) {
+        .auth-hero-bg {
+          background-image: url('/images/auth-hero-mobile.png');
+        }
+      }
+    </style>
+
+    <!-- Hero Background -->
+    <div class="auth-hero-bg"></div>
+    <div class="auth-hero-overlay"></div>
+
+    <div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center position-relative">
+
+      <!-- Floating emojis -->
+      <div class="emoji" style="left: 10%; animation-delay: 0s;">🐾</div>
+      <div class="emoji" style="left: 25%; animation-delay: 4s;">🐶</div>
+      <div class="emoji" style="left: 45%; animation-delay: 8s;">🐱</div>
+      <div class="emoji" style="left: 65%; animation-delay: 12s;">🐦</div>
+      <div class="emoji" style="left: 80%; animation-delay: 16s;">🐰</div>
+
+      <div class="row w-100 justify-content-center align-items-center">
+
+        <!-- Left side (branding/tagline) -->
+        <div class="col-lg-5 d-none d-lg-flex flex-column justify-content-center px-5 text-white">
+          <div class="mb-4">
+            <img src="/images/logo-black.svg" alt="Pethudl" height="70" style="filter: invert(1);" class="mb-3">
+          </div>
+          <h1 class="tagline">
+            Pethudl<br>
+            <span style="font-size: 2.5rem;">Where Pet Lovers Connect</span>
+          </h1>
+          <p class="subtitle mb-4">
+            Join our community to share moments, find services, and connect with fellow pet enthusiasts.
+          </p>
+          <div class="d-flex gap-3 align-items-center">
+            <div class="bg-white rounded-circle p-2" style="width: 50px; height: 50px;">
+              <span style="font-size: 2rem;">🐕</span>
+            </div>
+            <div class="bg-white rounded-circle p-2" style="width: 50px; height: 50px;">
+              <span style="font-size: 2rem;">🐈</span>
+            </div>
+            <div class="bg-white rounded-circle p-2" style="width: 50px; height: 50px;">
+              <span style="font-size: 2rem;">🐦</span>
+            </div>
+          </div>
         </div>
-        <h1 class="tagline">
-          Pethudl<br>
-          <span style="font-size: 2.5rem;">Where Pet Lovers Connect</span>
-        </h1>
-        <p class="subtitle mb-4">
-          Join our community to share moments, find services, and connect with fellow pet enthusiasts.
-        </p>
-        <div class="d-flex gap-3 align-items-center">
-          <div class="bg-white rounded-circle p-2" style="width: 50px; height: 50px;">
-            <span style="font-size: 2rem;">🐕</span>
-          </div>
-          <div class="bg-white rounded-circle p-2" style="width: 50px; height: 50px;">
-            <span style="font-size: 2rem;">🐈</span>
-          </div>
-          <div class="bg-white rounded-circle p-2" style="width: 50px; height: 50px;">
-            <span style="font-size: 2rem;">🐦</span>
-          </div>
-        </div>
-      </div>
 
-      <!-- Right side (login card) -->
-      <div class="col-lg-4 col-md-8 col-sm-10">
-        <div class="card shadow-lg border-0 rounded-4 auth-card">
-          <div class="card-body p-4">
-            <h4 class="text-center fw-bold mb-4">Log in to Pethudl</h4>
+        <!-- Right side (login card) -->
+        <div class="col-lg-4 col-md-8 col-sm-10">
+          <div class="card shadow-lg border-0 rounded-4 auth-card">
+            <div class="card-body p-4">
+              <h4 class="text-center fw-bold mb-4">Log in to Pethudl</h4>
 
-            <!-- Error Alert -->
-            <% if (typeof error !=='undefined' && error) { %>
-              <div class="alert alert-danger" role="alert">
-                <%= error %>
-              </div>
-              <% } %>
+              <!-- Error Alert -->
+              <% if (typeof error !=='undefined' && error) { %>
+                <div class="alert alert-danger" role="alert">
+                  <%= error %>
+                </div>
+                <% } %>
 
-                <!-- Login Form -->
-                <form action="/auth/login" method="POST">
-                  <div class="row g-3">
-                    <div class="col-12">
-                      <label for="email" class="form-label fw-bold">Email address <span
-                          class="text-danger">*</span></label>
-                      <input type="email" id="email" name="email" class="form-control" placeholder="Email address"
-                        value="<%= typeof formData !== 'undefined' ? formData.email : '' %>" required>
-                    </div>
-                    <div class="col-12">
-                      <label for="password" class="form-label fw-bold">Password <span
-                          class="text-danger">*</span></label>
-                      <div class="input-group">
-                        <input type="password" id="password" name="password" class="form-control" placeholder="Password"
-                          required>
-                        <button type="button" class="input-group-text toggle-password">
-                          <i class="fa fa-eye"></i>
-                        </button>
+                  <!-- Login Form -->
+                  <form action="/auth/login" method="POST">
+                    <div class="row g-3">
+                      <div class="col-12">
+                        <label for="email" class="form-label fw-bold">Email address <span
+                            class="text-danger">*</span></label>
+                        <input type="email" id="email" name="email" class="form-control" placeholder="Email address"
+                          value="<%= typeof formData !== 'undefined' ? formData.email : '' %>" required>
+                      </div>
+                      <div class="col-12">
+                        <label for="password" class="form-label fw-bold">Password <span
+                            class="text-danger">*</span></label>
+                        <div class="input-group">
+                          <input type="password" id="password" name="password" class="form-control"
+                            placeholder="Password" required>
+                          <button type="button" class="input-group-text toggle-password">
+                            <i class="fa fa-eye"></i>
+                          </button>
+                        </div>
+                      </div>
+                      <div class="col-12">
+                        <button type="submit" class="btn btn-dark w-100">Log In</button>
+                      </div>
+                      <div class="col-12 text-center border-bottom pb-3">
+                        <a href="/auth/forgot-password" class="text-decoration-none text-dark small">Forgot
+                          password?</a>
+                      </div>
+                      <div class="col-12">
+                        <a href="/auth/register" class="btn btn-light w-100">Create New Account</a>
                       </div>
                     </div>
-                    <div class="col-12">
-                      <button type="submit" class="btn btn-dark w-100">Log In</button>
-                    </div>
-                    <div class="col-12 text-center border-bottom pb-3">
-                      <a href="/auth/forgot-password" class="text-decoration-none text-dark small">Forgot password?</a>
-                    </div>
-                    <div class="col-12">
-                      <a href="/auth/register" class="btn btn-light w-100">Create New Account</a>
-                    </div>
-                  </div>
-                </form>
+                  </form>
+            </div>
           </div>
-        </div>
 
-        <!-- Footer -->
-        <p class="text-center text-white mt-3 small">
-          &copy; 2025 Pethudl. All rights reserved.
-        </p>
+          <!-- Footer -->
+          <p class="text-center text-white mt-3 small">
+            &copy; 2025 Pethudl. All rights reserved.
+          </p>
+        </div>
       </div>
     </div>
-  </div>
 
-  <script>
-    const togglePassword = document.querySelector(".toggle-password");
-    const password = document.querySelector("#password");
+    <script>
+      const togglePassword = document.querySelector(".toggle-password");
+      const password = document.querySelector("#password");
 
-    togglePassword.addEventListener("click", function () {
-      // toggle type attribute
-      const type = password.getAttribute("type") === "password" ? "text" : "password";
-      password.setAttribute("type", type);
+      togglePassword.addEventListener("click", function () {
+        // toggle type attribute
+        const type = password.getAttribute("type") === "password" ? "text" : "password";
+        password.setAttribute("type", type);
 
-      // toggle the icon
-      const icon = this.querySelector("i");
-      icon.classList.toggle("fa-eye");
-      icon.classList.toggle("fa-eye-slash");
-    });
-  </script>
+        // toggle the icon
+        const icon = this.querySelector("i");
+        icon.classList.toggle("fa-eye");
+        icon.classList.toggle("fa-eye-slash");
+      });
+    </script>

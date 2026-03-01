@@ -3,6 +3,7 @@ var router = express.Router();
 
 var postController = require('../controller/postController');
 var authenticateToken = require("../middlewares/auth");
+var optionalAuthenticateToken = require("../middlewares/optionalAuth");
 
 // Get upload URL for direct client uploads (for Vercel compatibility)
 router.get('/upload-url', authenticateToken, postController.getUploadUrl);
@@ -26,12 +27,14 @@ router.post('/create', authenticateToken, function (req, res, next) {
 });
 router.delete('/delete/:postId', authenticateToken, postController.deletePost);
 router.post('/:postId/like', authenticateToken, postController.likePost);
-router.get('/:postId/comments', authenticateToken, postController.getComments);
+// Comments can be viewed publicly
+router.get('/:postId/comments', optionalAuthenticateToken, postController.getComments);
 router.post('/:postId/comment', authenticateToken, postController.addComment);
 router.delete('/comment/:commentId', authenticateToken, postController.deleteComment);
 
 /* get view post */
-router.get('/view-post/:postId', authenticateToken, postController.viewPost);
+// Post view needs optional token so public users can view post
+router.get('/view-post/:postId', optionalAuthenticateToken, postController.viewPost);
 router.post('/:postId/share', authenticateToken, postController.sharePost);
 
 module.exports = router;

@@ -13,7 +13,7 @@ const upload = multer({
     const allowedTypes = /jpeg|jpg|png|gif|webp/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
-    
+
     if (mimetype && extname) {
       return cb(null, true);
     } else {
@@ -32,9 +32,9 @@ async function uploadToFirebaseStorage(file, folder = 'marketplace') {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     const ext = path.extname(file.originalname);
     const fileName = `${folder}/${uniqueSuffix}${ext}`;
-    
+
     const fileUpload = bucket.file(fileName);
-    
+
     const stream = fileUpload.createWriteStream({
       metadata: {
         contentType: file.mimetype,
@@ -82,10 +82,7 @@ async function deleteFromFirebaseStorage(url) {
  */
 async function showMarketplace(req, res, next) {
   try {
-    const user = res.locals.user || req.user;
-    if (!user) {
-      return res.redirect('/auth/login');
-    }
+    const user = res.locals.user || req.user || null;
 
     return res.render('marketplace/index', {
       title: 'Marketplace',
@@ -415,7 +412,7 @@ async function filterAds(req, res, next) {
       // Note: Firestore doesn't support full-text search natively
       // This is a simple implementation - for production, consider Algolia or similar
       query = query.where('title', '>=', search.trim())
-                   .where('title', '<=', search.trim() + '\uf8ff');
+        .where('title', '<=', search.trim() + '\uf8ff');
     }
 
     // Apply sorting

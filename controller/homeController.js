@@ -11,10 +11,6 @@ async function showHome(req, res, next) {
   try {
     const user = res.locals.user || req.user || null;
 
-    if (!user) {
-      return res.redirect('/auth/login');
-    }
-
     // Fetch posts from Firestore (ordered by created_at descending)
     let posts = [];
     try {
@@ -56,7 +52,7 @@ async function showHome(req, res, next) {
           id: doc.id,
           ...doc.data(),
         }))
-        .filter(u => u.id !== user.id) // Exclude current user
+        .filter(u => !user || u.id !== user.id) // Exclude current user if logged in
         .slice(0, 5); // Limit to 5 suggestions
     } catch (err) {
       console.error('Error fetching suggestions:', err);

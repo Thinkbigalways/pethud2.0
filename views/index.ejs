@@ -1,355 +1,391 @@
 <%- include('bootstrap/header') %>
-<%- include('bootstrap/header-nav', { user: user }) %>
+  <%- include('bootstrap/header-nav', { user: user }) %>
 
-<div class="py-3 py-md-4 bg-light min-vh-100">
-<div class="container-fluid px-2 px-sm-3">
-  <% if (typeof error !== 'undefined' && error) { %>
-  <div class="alert alert-danger alert-dismissible fade show mx-2 mx-sm-0" role="alert">
-    <%= error %>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
-  <% } %>
-  <div class="row g-3 g-md-4">
-    
-    <!-- LEFT SIDEBAR (hidden on mobile) -->
-    <div class="col-lg-3 d-none d-lg-block">
-      <div class="bg-white p-3 rounded shadow-sm sticky-top" style="top: 82px;">
-        <ul class="sidebar nav flex-column">
-          <li class="nav-item"><a class="nav-link active" href="/"><i class="fas fa-home me-3"></i>Feeds</a></li>
-          <li class="nav-item"><a class="nav-link" href="/@<%- user.username %>#posts"><i class="fas fa-sticky-note me-3"></i>My posts</a></li>
-          <li class="nav-item"><a class="nav-link" href="/@<%- user.username %>#friends"><i class="fas fa-user-friends me-3"></i>My friends</a></li>
-          <li class="nav-item"><a class="nav-link" href="/marketplace"><i class="fas fa-store me-3"></i>Marketplace</a></li>
-          <li class="nav-item mt-2 mb-2 border-top"></li>
-          <li class="nav-item"><a class="nav-link" href="/settings"><i class="fas fa-gear me-3"></i>Settings</a></li>
-          <li class="nav-item"><a class="nav-link" href="/auth/logout"><i class="fas fa-sign-out-alt me-3"></i>Logout</a></li>
-        </ul>
+    <div class="py-3 py-md-4 bg-light min-vh-100">
+      <div class="container-fluid px-2 px-sm-3">
+        <% if (typeof error !=='undefined' && error) { %>
+          <div class="alert alert-danger alert-dismissible fade show mx-2 mx-sm-0" role="alert">
+            <%= error %>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          <% } %>
+            <div class="row g-3 g-md-4">
+
+              <!-- LEFT SIDEBAR (hidden on mobile) -->
+              <div class="col-lg-3 d-none d-lg-block">
+                <div class="bg-white p-3 rounded shadow-sm sticky-top" style="top: 82px;">
+                  <ul class="sidebar nav flex-column">
+                    <li class="nav-item"><a class="nav-link active" href="/"><i class="fas fa-home me-3"></i>Feeds</a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" href="/marketplace"><i
+                          class="fas fa-store me-3"></i>Marketplace</a></li>
+                    <% if (user) { %>
+                      <li class="nav-item mt-2 mb-2 border-top"></li>
+                      <li class="nav-item"><a class="nav-link" href="/@<%- user.username %>#posts"><i
+                            class="fas fa-sticky-note me-3"></i>My posts</a></li>
+                      <li class="nav-item"><a class="nav-link" href="/@<%- user.username %>#friends"><i
+                            class="fas fa-user-friends me-3"></i>My friends</a></li>
+                      <li class="nav-item mt-2 mb-2 border-top"></li>
+                      <li class="nav-item"><a class="nav-link" href="/settings"><i
+                            class="fas fa-gear me-3"></i>Settings</a></li>
+                      <li class="nav-item"><a class="nav-link" href="/auth/logout"><i
+                            class="fas fa-sign-out-alt me-3"></i>Logout</a></li>
+                      <% } else { %>
+                        <li class="nav-item mt-2 mb-2 border-top"></li>
+                        <li class="nav-item"><a class="nav-link" href="/auth/login"><i
+                              class="fas fa-sign-in-alt me-3"></i>Login</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/auth/register"><i
+                              class="fas fa-user-plus me-3"></i>Register</a></li>
+                        <% } %>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- MAIN FEED -->
+              <div class="col-12 col-lg-6">
+
+                <!-- Create Post -->
+                <% if (user) { %>
+                  <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-body p-3 p-sm-4">
+                      <div class="d-flex mb-2 mb-sm-3 align-items-center">
+                        <img src="<%= user.profile_pic || '/images/paw.jpg' %>"
+                          class="rounded-circle border me-2 flex-shrink-0" alt="Profile"
+                          style="width:40px; height:40px; object-fit:cover;">
+                        <div class="form-control rounded-pill py-2" data-bs-toggle="modal"
+                          data-bs-target="#createPostModal" style="cursor:pointer;"><span
+                            class="text-muted small text-truncate d-block">What's on your mind?</span></div>
+                      </div>
+                      <div class="d-flex justify-content-around gap-1 flex-wrap">
+                        <button class="btn btn-light btn-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal"
+                          data-bs-target="#createPostModal"><i class="fas fa-image text-success me-1 me-sm-2"></i><span
+                            class="d-none d-sm-inline">Photo/Video</span></button>
+                        <button class="btn btn-light btn-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal"
+                          data-bs-target="#createPostModal"><i class="fas fa-smile text-warning me-1 me-sm-2"></i><span
+                            class="d-none d-sm-inline">Feeling</span></button>
+                      </div>
+                    </div>
+                  </div>
+                  <% } else { %>
+                    <div class="alert alert-info text-center shadow-sm border-0 mb-3" role="alert">
+                      <i class="fas fa-paw me-2"></i><strong>Welcome to Pethudl!</strong> <a href="/auth/login"
+                        class="text-decoration-none fw-bold">Log in</a> or <a href="/auth/register"
+                        class="text-decoration-none fw-bold">Sign up</a> to create posts, like, and comment.
+                    </div>
+                    <% } %>
+
+                      <!-- Posts -->
+                      <div id="post-container">
+                        <%- include('partials/posts', { posts: posts, user: user }) %>
+                      </div>
+                      <div id="loading" class="text-center my-3" style="display:none;">
+                        <div class="spinner-border text-dark"></div>
+                      </div>
+
+              </div>
+
+              <!-- RIGHT SIDEBAR (hidden on mobile) -->
+              <div class="col-lg-3 d-none d-lg-block">
+                <div class="sidebar bg-white p-3 rounded shadow-sm mb-3">
+                  <h6 class="fw-bold">Suggestions</h6>
+                  <% if (suggestions && suggestions.length> 0) { %>
+                    <% suggestions.forEach(s=> { %>
+                      <div class="d-flex align-items-center mb-2">
+                        <a href="/@<%- s.username %>">
+                          <img src="<%= s.profile_pic || '/images/paw.jpg' %>" class="rounded-circle border me-2"
+                            alt="<%= s.username %>" style="width:40px; height:40px; object-fit:cover;">
+                        </a>
+                        <div class="d-flex flex-column">
+                          <a href="/@<%- s.username %>" class="text-decoration-none fw-bold small text-dark">
+                            @<%= s.username %>
+                          </a>
+                          <span class="text-muted small"
+                            style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">
+                            <small>
+                              <%= s.bio || "🐾 Pet Lover" %>
+                            </small>
+                          </span>
+                        </div>
+                      </div>
+                      <% }) %>
+                        <% } else { %>
+                          <p class="text-muted small">No suggestions available</p>
+                          <% } %>
+                </div>
+
+                <div class="sidebar bg-white p-3 rounded shadow-sm">
+                  <h6 class="fw-bold">Trending</h6>
+                  <p class="mb-1">#pet</p>
+                  <p class="mb-1">#cat</p>
+                  <p class="mb-1">#dog_lover</p>
+                </div>
+              </div>
+
+            </div>
       </div>
     </div>
-    
-    <!-- MAIN FEED -->
-    <div class="col-12 col-lg-6">
 
-      <!-- Create Post -->
-      <div class="card border-0 shadow-sm mb-3">
-        <div class="card-body p-3 p-sm-4">
-          <div class="d-flex mb-2 mb-sm-3 align-items-center">
-            <img src="<%= user.profile_pic || '/images/paw.jpg' %>" class="rounded-circle border me-2 flex-shrink-0" alt="Profile" style="width:40px; height:40px; object-fit:cover;">
-            <div class="form-control rounded-pill py-2" data-bs-toggle="modal" data-bs-target="#createPostModal" style="cursor:pointer;"><span class="text-muted small text-truncate d-block">What's on your mind?</span></div>
+    <!-- Create Post Modal (fullscreen on mobile) -->
+    <div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+        <div class="modal-content">
+
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold" id="createPostModalLabel">Create Post</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="d-flex justify-content-around gap-1 flex-wrap">
-            <button class="btn btn-light btn-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#createPostModal"><i class="fas fa-image text-success me-1 me-sm-2"></i><span class="d-none d-sm-inline">Photo/Video</span></button>
-            <button class="btn btn-light btn-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#createPostModal"><i class="fas fa-smile text-warning me-1 me-sm-2"></i><span class="d-none d-sm-inline">Feeling</span></button>
-          </div>
-        </div>
-      </div>
 
-      <!-- Posts -->
-      <div id="post-container">
-        <%- include('partials/posts', { posts: posts, user: user }) %>
-      </div>
-      <div id="loading" class="text-center my-3" style="display:none;">
-        <div class="spinner-border text-dark"></div>
-      </div>
+          <!-- Modal Body -->
+          <form id="createPostForm" action="/posts/create" method="POST">
+            <div class="modal-body">
+              <div class="d-flex mb-3">
+                <img src="<%= user ? (user.profile_pic || '/images/paw.jpg') : '/images/paw.jpg' %>"
+                  class="rounded-circle border me-2" alt="Profile" style="width:40px; height:40px; object-fit:cover;">
+                <div>
+                  <strong>@<%= user ? user.username : 'Guest' %></strong>
+                  <div class="small text-muted">Public <i class="fas fa-caret-down"></i></div>
+                </div>
+              </div>
 
-    </div>
-    
-    <!-- RIGHT SIDEBAR (hidden on mobile) -->
-    <div class="col-lg-3 d-none d-lg-block">
-      <div class="sidebar bg-white p-3 rounded shadow-sm mb-3">
-        <h6 class="fw-bold">Suggestions</h6>
-        <% if (suggestions && suggestions.length > 0) { %>
-          <% suggestions.forEach(s => { %>
-            <div class="d-flex align-items-center mb-2">
-              <a href="/@<%- s.username %>">
-                <img src="<%= s.profile_pic || '/images/paw.jpg' %>" 
-                    class="rounded-circle border me-2" 
-                    alt="<%= s.username %>" 
-                    style="width:40px; height:40px; object-fit:cover;">
-              </a>
-              <div class="d-flex flex-column">
-                <a href="/@<%- s.username %>" class="text-decoration-none fw-bold small text-dark">
-                  @<%= s.username %>
-                </a>
-                <span class="text-muted small" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">
-                  <small><%= s.bio || "🐾 Pet Lover" %></small>
-                </span>
+              <!-- Post Text -->
+              <textarea name="content" id="postContent" class="form-control mb-3" rows="4"
+                placeholder="What's on your mind?" required></textarea>
+
+              <!-- Media Upload -->
+              <div class="border rounded p-3 mt-2 text-center">
+                <label for="createPostMedia" class="mb-0" style="cursor:pointer;">
+                  <i class="fas fa-image text-success me-2"></i>
+                  <span>Add Photos/Videos</span>
+                  <input type="file" id="createPostMedia" name="media" accept="image/*,video/*" multiple
+                    class="visually-hidden">
+                </label>
+              </div>
+
+              <!-- Optional preview area -->
+              <div id="mediaPreview" class="mt-3 d-flex flex-wrap gap-2"></div>
+
+              <!-- Upload progress -->
+              <div id="uploadProgress" class="mt-2" style="display:none;">
+                <div class="progress">
+                  <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+                <small class="text-muted">Uploading files...</small>
               </div>
             </div>
-          <% }) %>
-        <% } else { %>
-          <p class="text-muted small">No suggestions available</p>
-        <% } %>
-      </div>
 
-      <div class="sidebar bg-white p-3 rounded shadow-sm">
-        <h6 class="fw-bold">Trending</h6>
-        <p class="mb-1">#pet</p>
-        <p class="mb-1">#cat</p>
-        <p class="mb-1">#dog_lover</p>
+            <!-- Modal Footer -->
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" id="submitPostBtn" class="btn btn-dark px-4">Post</button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
 
-  </div>
-</div>
-</div>
+    <script>
+      // Live preview of selected images/videos for create post
+      (function () {
+        const fileInput = document.querySelector('#createPostMedia');
+        const preview = document.getElementById('mediaPreview');
+        if (!fileInput || !preview) return;
 
-<!-- Create Post Modal (fullscreen on mobile) -->
-<div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
-    <div class="modal-content">
-
-      <!-- Modal Header -->
-      <div class="modal-header">
-        <h5 class="modal-title fw-bold" id="createPostModalLabel">Create Post</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-
-      <!-- Modal Body -->
-      <form id="createPostForm" action="/posts/create" method="POST">
-        <div class="modal-body">
-          <div class="d-flex mb-3">
-            <img src="<%= user.profile_pic || '/images/paw.jpg' %>" class="rounded-circle border me-2" alt="Profile" style="width:40px; height:40px; object-fit:cover;">
-            <div>
-              <strong>@<%= user.username %></strong>
-              <div class="small text-muted">Public <i class="fas fa-caret-down"></i></div>
-            </div>
-          </div>
-
-          <!-- Post Text -->
-          <textarea name="content" id="postContent" class="form-control mb-3" rows="4" placeholder="What's on your mind?" required></textarea>
-
-          <!-- Media Upload -->
-          <div class="border rounded p-3 mt-2 text-center">
-            <label for="createPostMedia" class="mb-0" style="cursor:pointer;">
-              <i class="fas fa-image text-success me-2"></i>
-              <span>Add Photos/Videos</span>
-              <input type="file" id="createPostMedia" name="media" accept="image/*,video/*" multiple class="visually-hidden">
-            </label>
-          </div>
-
-          <!-- Optional preview area -->
-          <div id="mediaPreview" class="mt-3 d-flex flex-wrap gap-2"></div>
-          
-          <!-- Upload progress -->
-          <div id="uploadProgress" class="mt-2" style="display:none;">
-            <div class="progress">
-              <div class="progress-bar" role="progressbar" style="width: 0%"></div>
-            </div>
-            <small class="text-muted">Uploading files...</small>
-          </div>
-        </div>
-
-        <!-- Modal Footer -->
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" id="submitPostBtn" class="btn btn-dark px-4">Post</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<script>
-  // Live preview of selected images/videos for create post
-  (function() {
-    const fileInput = document.querySelector('#createPostMedia');
-    const preview = document.getElementById('mediaPreview');
-    if (!fileInput || !preview) return;
-
-    fileInput.addEventListener('change', function() {
-      // Revoke previous object URLs to avoid memory leaks
-      preview.querySelectorAll('img, video').forEach(function(el) { if (el.src && el.src.startsWith('blob:')) URL.revokeObjectURL(el.src); });
-      preview.innerHTML = '';
-      Array.from(fileInput.files).forEach(function(file) {
-      const url = URL.createObjectURL(file);
-      let element;
-      if(file.type.startsWith('video/')){
-        element = document.createElement('video');
-        element.src = url;
-        element.controls = true;
-        element.width = 100;
-        element.classList.add('rounded');
-      } else {
-        element = document.createElement('img');
-        element.src = url;
-        element.width = 100;
-        element.classList.add('rounded');
-      }
-      preview.appendChild(element);
-    });
-    });
-  })();
-
-  // Handle form submission with client-side uploads (for Vercel compatibility)
-  document.getElementById('createPostForm')?.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const form = e.target;
-    const content = document.getElementById('postContent').value.trim();
-    const fileInput = document.getElementById('createPostMedia');
-    const submitBtn = document.getElementById('submitPostBtn');
-    const progressDiv = document.getElementById('uploadProgress');
-    const progressBar = progressDiv?.querySelector('.progress-bar');
-    const progressText = progressDiv?.querySelector('small');
-    
-    if (!content) {
-      alert('Please enter post content');
-      return;
-    }
-
-    const files = Array.from(fileInput.files || []);
-    const mediaUrls = [];
-    
-    // Validate file sizes
-    const maxSize = 50 * 1024 * 1024; // 50MB
-    for (const file of files) {
-      if (file.size > maxSize) {
-        alert(`File "${file.name}" is too large. Maximum file size is ${(maxSize / 1024 / 1024).toFixed(0)}MB.`);
-        return;
-      }
-    }
-    
-    // Disable submit button
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Posting...';
-    }
-    if (progressDiv) progressDiv.style.display = 'block';
-    if (progressBar) progressBar.style.width = '0%';
-    if (progressText) progressText.textContent = 'Preparing upload...';
-
-    try {
-      // Upload files directly to Firebase Storage
-      if (files.length > 0) {
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i];
-          
-          try {
-            if (progressText) {
-              progressText.textContent = `Uploading ${i + 1} of ${files.length}: ${file.name}...`;
-            }
-            
-            // Get upload URL from server
-            const urlRes = await fetch(`/posts/upload-url?fileName=${encodeURIComponent(file.name)}&contentType=${encodeURIComponent(file.type)}&fileSize=${file.size}`);
-            
-            if (!urlRes.ok) {
-              throw new Error(`Server error: ${urlRes.status} ${urlRes.statusText}`);
-            }
-            
-            const urlData = await urlRes.json();
-            
-            if (!urlData.success) {
-              throw new Error(urlData.message || 'Failed to get upload URL from server');
-            }
-
-            // Upload file using XMLHttpRequest (better CORS handling)
-            const uploadPromise = new Promise((resolve, reject) => {
-              const xhr = new XMLHttpRequest();
-              
-              xhr.upload.addEventListener('progress', (e) => {
-                if (e.lengthComputable) {
-                  const fileProgress = (e.loaded / e.total) * 100;
-                  const totalProgress = ((i + fileProgress / 100) / files.length) * 100;
-                  if (progressBar) {
-                    progressBar.style.width = `${totalProgress}%`;
-                  }
-                }
-              });
-              
-              xhr.addEventListener('load', () => {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                  resolve();
-                } else {
-                  reject(new Error(`Upload failed with status ${xhr.status}: ${xhr.statusText || 'Unknown error'}`));
-                }
-              });
-              
-              xhr.addEventListener('error', () => {
-                reject(new Error('Network error: Failed to upload file. Please check your internet connection and try again.'));
-              });
-              
-              xhr.addEventListener('abort', () => {
-                reject(new Error('Upload was cancelled.'));
-              });
-              
-              xhr.open('PUT', urlData.uploadUrl);
-              xhr.setRequestHeader('Content-Type', file.type);
-              xhr.send(file);
-            });
-
-            await uploadPromise;
-            mediaUrls.push(urlData.publicUrl);
-            
-            // Update progress
-            if (progressBar) {
-              progressBar.style.width = `${((i + 1) / files.length) * 100}%`;
-            }
-          } catch (uploadError) {
-            console.error(`Error uploading file ${file.name}:`, uploadError);
-            
-            // Provide specific error messages
-            let errorMessage = 'Failed to upload file';
-            if (uploadError.message.includes('CORS')) {
-              errorMessage = `CORS error uploading "${file.name}". This may be a configuration issue. Please try again or contact support.`;
-            } else if (uploadError.message.includes('Network error')) {
-              errorMessage = `Network error uploading "${file.name}". Please check your internet connection and try again.`;
-            } else if (uploadError.message.includes('status 403')) {
-              errorMessage = `Permission denied uploading "${file.name}". The upload URL may have expired. Please try again.`;
-            } else if (uploadError.message.includes('status 413')) {
-              errorMessage = `File "${file.name}" is too large. Maximum file size is ${(maxSize / 1024 / 1024).toFixed(0)}MB.`;
+        fileInput.addEventListener('change', function () {
+          // Revoke previous object URLs to avoid memory leaks
+          preview.querySelectorAll('img, video').forEach(function (el) { if (el.src && el.src.startsWith('blob:')) URL.revokeObjectURL(el.src); });
+          preview.innerHTML = '';
+          Array.from(fileInput.files).forEach(function (file) {
+            const url = URL.createObjectURL(file);
+            let element;
+            if (file.type.startsWith('video/')) {
+              element = document.createElement('video');
+              element.src = url;
+              element.controls = true;
+              element.width = 100;
+              element.classList.add('rounded');
             } else {
-              errorMessage = uploadError.message || `Failed to upload "${file.name}". Please try again.`;
+              element = document.createElement('img');
+              element.src = url;
+              element.width = 100;
+              element.classList.add('rounded');
             }
-            
-            throw new Error(errorMessage);
+            preview.appendChild(element);
+          });
+        });
+      })();
+
+      // Handle form submission with client-side uploads (for Vercel compatibility)
+      document.getElementById('createPostForm')?.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const form = e.target;
+        const content = document.getElementById('postContent').value.trim();
+        const fileInput = document.getElementById('createPostMedia');
+        const submitBtn = document.getElementById('submitPostBtn');
+        const progressDiv = document.getElementById('uploadProgress');
+        const progressBar = progressDiv?.querySelector('.progress-bar');
+        const progressText = progressDiv?.querySelector('small');
+
+        if (!content) {
+          alert('Please enter post content');
+          return;
+        }
+
+        const files = Array.from(fileInput.files || []);
+        const mediaUrls = [];
+
+        // Validate file sizes
+        const maxSize = 50 * 1024 * 1024; // 50MB
+        for (const file of files) {
+          if (file.size > maxSize) {
+            alert(`File "${file.name}" is too large. Maximum file size is ${(maxSize / 1024 / 1024).toFixed(0)}MB.`);
+            return;
           }
         }
-      }
 
-      if (progressText) progressText.textContent = 'Creating post...';
-
-      // Submit form with media URLs
-      const formData = new FormData();
-      formData.append('content', content);
-      if (mediaUrls.length > 0) {
-        formData.append('mediaUrls', JSON.stringify(mediaUrls));
-      }
-
-      const submitRes = await fetch('/posts/create', {
-        method: 'POST',
-        body: formData
-      });
-
-      if (submitRes.redirected) {
-        window.location.href = submitRes.url;
-      } else {
-        const result = await submitRes.text();
-        if (submitRes.ok) {
-          window.location.reload();
-        } else {
-          throw new Error('Failed to create post. Please try again.');
+        // Disable submit button
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Posting...';
         }
-      }
-    } catch (error) {
-      console.error('Error creating post:', error);
-      
-      // Show user-friendly error message
-      let userMessage = 'Error creating post';
-      if (error.message) {
-        userMessage = error.message;
-      } else if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-        userMessage = 'Network error: Could not connect to server. Please check your internet connection and try again.';
-      }
-      
-      alert(userMessage);
-      
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Post';
-      }
-      if (progressDiv) progressDiv.style.display = 'none';
-    }
-  });
-</script>
+        if (progressDiv) progressDiv.style.display = 'block';
+        if (progressBar) progressBar.style.width = '0%';
+        if (progressText) progressText.textContent = 'Preparing upload...';
 
-<%- include('bootstrap/footer') %>
+        try {
+          // Upload files directly to Firebase Storage
+          if (files.length > 0) {
+            for (let i = 0; i < files.length; i++) {
+              const file = files[i];
+
+              try {
+                if (progressText) {
+                  progressText.textContent = `Uploading ${i + 1} of ${files.length}: ${file.name}...`;
+                }
+
+                // Get upload URL from server
+                const urlRes = await fetch(`/posts/upload-url?fileName=${encodeURIComponent(file.name)}&contentType=${encodeURIComponent(file.type)}&fileSize=${file.size}`);
+
+                if (!urlRes.ok) {
+                  throw new Error(`Server error: ${urlRes.status} ${urlRes.statusText}`);
+                }
+
+                const urlData = await urlRes.json();
+
+                if (!urlData.success) {
+                  throw new Error(urlData.message || 'Failed to get upload URL from server');
+                }
+
+                // Upload file using XMLHttpRequest (better CORS handling)
+                const uploadPromise = new Promise((resolve, reject) => {
+                  const xhr = new XMLHttpRequest();
+
+                  xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                      const fileProgress = (e.loaded / e.total) * 100;
+                      const totalProgress = ((i + fileProgress / 100) / files.length) * 100;
+                      if (progressBar) {
+                        progressBar.style.width = `${totalProgress}%`;
+                      }
+                    }
+                  });
+
+                  xhr.addEventListener('load', () => {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                      resolve();
+                    } else {
+                      reject(new Error(`Upload failed with status ${xhr.status}: ${xhr.statusText || 'Unknown error'}`));
+                    }
+                  });
+
+                  xhr.addEventListener('error', () => {
+                    reject(new Error('Network error: Failed to upload file. Please check your internet connection and try again.'));
+                  });
+
+                  xhr.addEventListener('abort', () => {
+                    reject(new Error('Upload was cancelled.'));
+                  });
+
+                  xhr.open('PUT', urlData.uploadUrl);
+                  xhr.setRequestHeader('Content-Type', file.type);
+                  xhr.send(file);
+                });
+
+                await uploadPromise;
+                mediaUrls.push(urlData.publicUrl);
+
+                // Update progress
+                if (progressBar) {
+                  progressBar.style.width = `${((i + 1) / files.length) * 100}%`;
+                }
+              } catch (uploadError) {
+                console.error(`Error uploading file ${file.name}:`, uploadError);
+
+                // Provide specific error messages
+                let errorMessage = 'Failed to upload file';
+                if (uploadError.message.includes('CORS')) {
+                  errorMessage = `CORS error uploading "${file.name}". This may be a configuration issue. Please try again or contact support.`;
+                } else if (uploadError.message.includes('Network error')) {
+                  errorMessage = `Network error uploading "${file.name}". Please check your internet connection and try again.`;
+                } else if (uploadError.message.includes('status 403')) {
+                  errorMessage = `Permission denied uploading "${file.name}". The upload URL may have expired. Please try again.`;
+                } else if (uploadError.message.includes('status 413')) {
+                  errorMessage = `File "${file.name}" is too large. Maximum file size is ${(maxSize / 1024 / 1024).toFixed(0)}MB.`;
+                } else {
+                  errorMessage = uploadError.message || `Failed to upload "${file.name}". Please try again.`;
+                }
+
+                throw new Error(errorMessage);
+              }
+            }
+          }
+
+          if (progressText) progressText.textContent = 'Creating post...';
+
+          // Submit form with media URLs
+          const formData = new FormData();
+          formData.append('content', content);
+          if (mediaUrls.length > 0) {
+            formData.append('mediaUrls', JSON.stringify(mediaUrls));
+          }
+
+          const submitRes = await fetch('/posts/create', {
+            method: 'POST',
+            body: formData
+          });
+
+          if (submitRes.redirected) {
+            window.location.href = submitRes.url;
+          } else {
+            const result = await submitRes.text();
+            if (submitRes.ok) {
+              window.location.reload();
+            } else {
+              throw new Error('Failed to create post. Please try again.');
+            }
+          }
+        } catch (error) {
+          console.error('Error creating post:', error);
+
+          // Show user-friendly error message
+          let userMessage = 'Error creating post';
+          if (error.message) {
+            userMessage = error.message;
+          } else if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+            userMessage = 'Network error: Could not connect to server. Please check your internet connection and try again.';
+          }
+
+          alert(userMessage);
+
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Post';
+          }
+          if (progressDiv) progressDiv.style.display = 'none';
+        }
+      });
+    </script>
+
+    <%- include('bootstrap/footer') %>

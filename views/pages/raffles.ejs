@@ -1,0 +1,30 @@
+<%- include('../bootstrap/header') %>
+    <%- include('../bootstrap/header-nav', { user: user }) %>
+
+        <div
+            class="container-fluid min-vh-100 d-flex flex-column align-items-center justify-content-center bg-light px-3 py-5">
+            <div class="text-center" style="max-width: 600px;">
+                <!-- Icon or Illustration -->
+                <div class="mb-4">
+                    <i class="fas fa-gift text-danger" style="font-size: 5rem;"></i>
+                </div>
+
+                <!-- Main Heading -->
+                <h1 class="display-4 fw-bold mb-3">Raffles & Giveaways</h1>
+
+                <!-- Subtitle/Message -->
+                <h2 class="h3 text-muted mb-4">COMING SOON</h2>
+
+                <p class="lead text-secondary mb-5">
+                    We are working hard to bring you exciting raffles and giveaways.
+                    Check back soon for a chance to win amazing prizes for you and your pets!
+                </p>
+
+                <!-- Call to action (optional) -->
+                <a href="/" class="btn btn-dark btn-lg px-4 rounded-pill shadow-sm">
+                    <i class="fas fa-home me-2"></i> Back to Feeds
+                </a>
+            </div>
+        </div>
+
+        <%- include('../bootstrap/footer') %>

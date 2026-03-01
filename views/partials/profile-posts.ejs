@@ -29,7 +29,7 @@
               <i class="fa fa-ellipsis"></i>
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
-              <% if (user.id===profileUser.id) { %>
+              <% if (user && user.id===profileUser.id) { %>
                 <li>
                   <a class="dropdown-item delete-post-btn" href="/posts/delete/<%- post.id %>"
                     data-post-id="<%- post.id %>">
@@ -79,17 +79,29 @@
 
             <!-- Action Buttons -->
             <div class="d-flex justify-content-between gap-2 mt-3">
-              <button class="btn btn-light btn-sm like-btn flex-fill">
-                <i class="<%= post.is_liked ? 'fas text-primary' : 'far' %> fa-thumbs-up me-2"></i> Like
-              </button>
-              <button class="btn btn-light btn-sm comment-btn flex-fill" data-bs-toggle="modal"
-                data-bs-target="#commentModal-<%= post.id %>">
-                <i class="far fa-comment me-2"></i> Comment
-              </button>
-              <button class="btn btn-light btn-sm flex-fill" data-bs-toggle="modal"
-                data-bs-target="#shareModal-<%= post.id %>">
-                <i class="fas fa-share me-2"></i> Share
-              </button>
+              <% if (typeof user !=='undefined' && user) { %>
+                <button class="btn btn-light btn-sm like-btn flex-fill">
+                  <i class="<%= post.is_liked ? 'fas text-primary' : 'far' %> fa-thumbs-up me-2"></i> Like
+                </button>
+                <button class="btn btn-light btn-sm comment-btn flex-fill" data-bs-toggle="modal"
+                  data-bs-target="#commentModal-<%= post.id %>">
+                  <i class="far fa-comment me-2"></i> Comment
+                </button>
+                <button class="btn btn-light btn-sm flex-fill" data-bs-toggle="modal"
+                  data-bs-target="#shareModal-<%= post.id %>">
+                  <i class="fas fa-share me-2"></i> Share
+                </button>
+                <% } else { %>
+                  <a href="/auth/login" class="btn btn-light btn-sm flex-fill text-decoration-none text-dark">
+                    <i class="far fa-thumbs-up me-2"></i> Like
+                  </a>
+                  <a href="/auth/login" class="btn btn-light btn-sm flex-fill text-decoration-none text-dark">
+                    <i class="far fa-comment me-2"></i> Comment
+                  </a>
+                  <a href="/auth/login" class="btn btn-light btn-sm flex-fill text-decoration-none text-dark">
+                    <i class="fas fa-share me-2"></i> Share
+                  </a>
+                  <% } %>
             </div>
       </div>
     </div>
