@@ -17,7 +17,7 @@ async function showHome(req, res, next) {
       const postsSnapshot = await db
         .collection(POSTS_COLLECTION)
         .orderBy('created_at', 'desc')
-        .limit(50)
+        .limit(10)
         .get();
 
       posts = postsSnapshot.docs.map(doc => {

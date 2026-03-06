@@ -44,7 +44,7 @@
               <!-- MAIN FEED -->
               <div class="col-12 col-lg-6">
 
-                <!-- Create Post -->
+                <!-- Create Post (only for logged-in users) -->
                 <% if (user) { %>
                   <div class="card border-0 shadow-sm mb-3">
                     <div class="card-body p-3 p-sm-4">
@@ -53,24 +53,31 @@
                           class="rounded-circle border me-2 flex-shrink-0" alt="Profile"
                           style="width:40px; height:40px; object-fit:cover;">
                         <div class="form-control rounded-pill py-2" data-bs-toggle="modal"
-                          data-bs-target="#createPostModal" style="cursor:pointer;"><span
-                            class="text-muted small text-truncate d-block">What's on your mind?</span></div>
+                          data-bs-target="#createPostModal" style="cursor:pointer;">
+                          <span class="text-muted small text-truncate d-block">What's on your mind?</span>
+                        </div>
                       </div>
                       <div class="d-flex justify-content-around gap-1 flex-wrap">
                         <button class="btn btn-light btn-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal"
-                          data-bs-target="#createPostModal"><i class="fas fa-image text-success me-1 me-sm-2"></i><span
-                            class="d-none d-sm-inline">Photo/Video</span></button>
+                          data-bs-target="#createPostModal">
+                          <i class="fas fa-image text-success me-1 me-sm-2"></i>
+                          <span class="d-none d-sm-inline">Photo/Video</span>
+                        </button>
                         <button class="btn btn-light btn-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal"
-                          data-bs-target="#createPostModal"><i class="fas fa-smile text-warning me-1 me-sm-2"></i><span
-                            class="d-none d-sm-inline">Feeling</span></button>
+                          data-bs-target="#createPostModal">
+                          <i class="fas fa-smile text-warning me-1 me-sm-2"></i>
+                          <span class="d-none d-sm-inline">Feeling</span>
+                        </button>
                       </div>
                     </div>
                   </div>
                   <% } else { %>
                     <div class="alert alert-info text-center shadow-sm border-0 mb-3" role="alert">
-                      <i class="fas fa-paw me-2"></i><strong>Welcome to Pethudl!</strong> <a href="/auth/login"
-                        class="text-decoration-none fw-bold">Log in</a> or <a href="/auth/register"
-                        class="text-decoration-none fw-bold">Sign up</a> to create posts, like, and comment.
+                      <i class="fas fa-paw me-2"></i>
+                      <strong>Welcome to Pethudl!</strong>
+                      <a href="/auth/login" class="text-decoration-none fw-bold">Log in</a> or
+                      <a href="/auth/register" class="text-decoration-none fw-bold">Sign up</a>
+                      to create posts, like, and comment.
                     </div>
                     <% } %>
 
@@ -78,11 +85,31 @@
                       <div id="post-container">
                         <%- include('partials/posts', { posts: posts, user: user }) %>
                       </div>
-                      <div id="loading" class="text-center my-3" style="display:none;">
-                        <div class="spinner-border text-dark"></div>
+
+                      <!-- Infinite scroll trigger / loading indicator -->
+                      <div id="loading" class="text-center my-4">
+                        <div class="spinner-border text-dark" role="status">
+                          <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-muted small mt-1">Loading more posts...</p>
+                      </div>
+                      <div id="no-more-posts" class="text-center text-muted small my-3" style="display:none;">
+                        You&apos;re all caught up! 🐾
                       </div>
 
+                      <!-- Store initial cursor for pagination -->
+                      <% if (posts && posts.length> 0) { %>
+                        <script>
+                          window.__initialCursor = "<%= posts[posts.length - 1].created_at instanceof Date ? posts[posts.length - 1].created_at.toISOString() : new Date(posts[posts.length - 1].created_at).toISOString() %>";
+                        </script>
+                        <% } else { %>
+                          <script>window.__initialCursor = null;</script>
+                          <% } %>
+                            <!-- Auth flag for client-side JS -->
+                            <script>window.__userLoggedIn = <%= user ? 'true' : 'false' %>;</script>
+
               </div>
+              <!-- END MAIN FEED -->
 
               <!-- RIGHT SIDEBAR (hidden on mobile) -->
               <div class="col-lg-3 d-none d-lg-block">
@@ -388,4 +415,158 @@
       });
     </script>
 
+    <!-- Infinite Scroll Script -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const postContainer = document.getElementById('post-container');
+        const loadingEl = document.getElementById('loading');
+        const noMoreEl = document.getElementById('no-more-posts');
+
+        if (!postContainer || !loadingEl) return;
+
+        let isLoading = false;
+        let hasMore = true;
+        let nextCursor = window.__initialCursor || null;
+
+        // If there were fewer than 10 initial posts, there are probably no more
+        const initialCount = postContainer.querySelectorAll('.card[data-post-id]').length;
+        if (initialCount < 10) {
+          hasMore = false;
+          loadingEl.style.display = 'none';
+          if (noMoreEl) noMoreEl.style.display = 'block';
+        }
+
+        // Observer triggers once loading spinner enters the viewport
+        const observer = new IntersectionObserver((entries) => {
+          if (entries[0].isIntersecting && !isLoading && hasMore) {
+            loadMorePosts();
+          }
+        }, { rootMargin: '200px' });
+
+        if (hasMore) observer.observe(loadingEl);
+
+        async function loadMorePosts() {
+          if (isLoading || !hasMore) return;
+          isLoading = true;
+
+          try {
+            const url = nextCursor
+              ? `/posts/api-feed?limit=10&cursor=${encodeURIComponent(nextCursor)}`
+              : '/posts/api-feed?limit=10';
+
+            const res = await fetch(url);
+            const data = await res.json();
+
+            if (!data.success || !data.posts || data.posts.length === 0) {
+              hasMore = false;
+              loadingEl.style.display = 'none';
+              if (noMoreEl) noMoreEl.style.display = 'block';
+              observer.disconnect();
+              return;
+            }
+
+            // Render each post card into DOM
+            data.posts.forEach(post => {
+              const card = buildPostCard(post);
+              postContainer.insertAdjacentHTML('beforeend', card);
+            });
+
+            nextCursor = data.nextCursor;
+            hasMore = data.hasMore;
+
+            if (!hasMore) {
+              loadingEl.style.display = 'none';
+              if (noMoreEl) noMoreEl.style.display = 'block';
+              observer.disconnect();
+            }
+          } catch (err) {
+            console.error('Error loading more posts:', err);
+          } finally {
+            isLoading = false;
+          }
+        }
+
+        function formatDate(dateStr) {
+          try {
+            return new Date(dateStr).toLocaleString();
+          } catch (e) { return ''; }
+        }
+
+        function escapeHtml(str) {
+          if (!str) return '';
+          return str.toString()
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+        }
+
+        function buildPostCard(post) {
+          const username = escapeHtml(post.username);
+          const content = escapeHtml(post.content);
+          const profilePic = escapeHtml(post.profile_pic) || '/images/paw.jpg';
+          const createdAt = formatDate(post.created_at);
+          const likeCount = post.likeCount || 0;
+          const commentCount = post.commentCount || 0;
+
+          // Media HTML
+          let mediaHtml = '';
+          if (post.media && post.media.length > 0) {
+            mediaHtml = `<div class="mb-2 post-media-grid ${post.media.length === 1 ? 'single' : ''}">`;
+            post.media.forEach(url => {
+              if (/\.(mp4|mov|avi)$/i.test(url)) {
+                mediaHtml += `<div class="post-media-item"><video src="${escapeHtml(url)}" controls playsinline preload="metadata"></video></div>`;
+              } else {
+                mediaHtml += `<div class="post-media-item"><img src="${escapeHtml(url)}" class="img-fluid" alt="Post media"></div>`;
+              }
+            });
+            mediaHtml += '</div>';
+          }
+
+          // Action buttons (aware of auth status)
+          const userLoggedIn = window.__userLoggedIn || false;
+
+          const likeBtn = userLoggedIn
+            ? `<button class="btn btn-light btn-sm like-btn flex-fill" data-post-id="${post.id}"><i class="far fa-thumbs-up me-2"></i>Like</button>`
+            : `<a href="/auth/login" class="btn btn-light btn-sm flex-fill text-decoration-none text-dark"><i class="far fa-thumbs-up me-2"></i>Like</a>`;
+
+          const commentBtn = `<a href="/posts/view-post/${post.id}" class="btn btn-light btn-sm flex-fill text-decoration-none text-dark"><i class="far fa-comment me-2"></i>Comment</a>`;
+
+          const shareBtn = `<a href="/posts/view-post/${post.id}" class="btn btn-light btn-sm flex-fill text-decoration-none text-dark"><i class="fas fa-share me-2"></i>Share</a>`;
+
+          return `
+            <div class="card border-0 shadow-sm mb-3" data-post-id="${post.id}">
+              <div class="card-body p-3 p-sm-4">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <div class="d-flex align-items-center">
+                    <a href="/@${username}">
+                      <img src="${profilePic}" class="rounded-circle border me-2" style="width:40px;height:40px;object-fit:cover;" alt="${username}">
+                    </a>
+                    <div class="d-flex flex-column">
+                      <a href="/@${username}" class="text-decoration-none text-dark fw-bold mb-0">@${username}</a>
+                      <a href="/posts/view-post/${post.id}" class="text-decoration-none text-muted small">${createdAt}</a>
+                    </div>
+                  </div>
+                  <div class="d-flex">
+                    <a class="btn btn-sm btn-light rounded-circle" href="/posts/view-post/${post.id}" style="height:30px;width:30px;border:none;" title="View Post">
+                      <i class="fa fa-ellipsis"></i>
+                    </a>
+                  </div>
+                </div>
+                <p>${content}</p>
+                ${mediaHtml}
+                <div class="d-flex justify-content-between align-items-center mt-2 border-top border-bottom pt-2 pb-2">
+                  <span class="text-muted small">${likeCount > 0 ? likeCount + ' Likes' : ''}</span>
+                  <span class="text-muted small">${commentCount} Comments</span>
+                </div>
+                <div class="d-flex justify-content-between gap-2 mt-3">
+                  ${likeBtn}
+                  ${commentBtn}
+                  ${shareBtn}
+                </div>
+              </div>
+            </div>`;
+        }
+      });
+    </script>
     <%- include('bootstrap/footer') %>

@@ -37,4 +37,7 @@ router.delete('/comment/:commentId', authenticateToken, postController.deleteCom
 router.get('/view-post/:postId', optionalAuthenticateToken, postController.viewPost);
 router.post('/:postId/share', authenticateToken, postController.sharePost);
 
+// Pagination API for infinite scroll
+router.get('/api-feed', optionalAuthenticateToken, postController.getFeedPosts);
+
 module.exports = router;

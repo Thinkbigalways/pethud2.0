@@ -583,6 +583,65 @@ async function sharePost(req, res) {
   }
 }
 
+/**
+ * Fetch paginated posts for infinite scroll
+ * Query params: 
+ *   - limit: number of posts to fetch (default: 10)
+ *   - cursor: timestamp of the last post fetched (for pagination)
+ */
+async function getFeedPosts(req, res) {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+    const cursorStr = req.query.cursor;
+
+    let query = db.collection(POSTS_COLLECTION)
+      .orderBy('created_at', 'desc');
+
+    // Apply cursor if provided
+    if (cursorStr && cursorStr !== 'undefined' && cursorStr !== 'null') {
+      try {
+        // Parse the ISO date string back to a Date object, then to Firestore Timestamp
+        const cursorDate = new Date(cursorStr);
+        if (!isNaN(cursorDate.getTime())) {
+          query = query.startAfter(admin.firestore.Timestamp.fromDate(cursorDate));
+        }
+      } catch (e) {
+        console.error("Invalid pagination cursor:", cursorStr, e);
+      }
+    }
+
+    query = query.limit(limit);
+    const postsSnapshot = await query.get();
+
+    const posts = postsSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        // Convert Firestore timestamps to JavaScript dates/strings for JSON transfer
+        created_at: data.created_at?.toDate ? data.created_at.toDate() : new Date(),
+        // Add counts
+        commentCount: Array.isArray(data.comments) ? data.comments.length : 0,
+        likeCount: Array.isArray(data.likes) ? data.likes.length : 0,
+        // Ensure likes/comments arrays exist so frontend doesn't crash
+        likes: data.likes || [],
+        comments: data.comments || []
+      };
+    });
+
+    return res.json({
+      success: true,
+      posts,
+      hasMore: posts.length === limit,
+      nextCursor: posts.length > 0 ? posts[posts.length - 1].created_at.toISOString() : null
+    });
+
+  } catch (error) {
+    console.error('Error fetching paginated posts:', error);
+    return res.status(500).json({ success: false, message: 'Failed to fetch posts' });
+  }
+}
+
 module.exports = {
   uploadMedia,
   getUploadUrl,
@@ -594,4 +653,5 @@ module.exports = {
   deleteComment,
   viewPost,
   sharePost,
+  getFeedPosts
 };

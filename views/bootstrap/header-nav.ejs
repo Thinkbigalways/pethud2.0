@@ -4,8 +4,15 @@
     <!-- Brand -->
     <a class="navbar-brand d-flex align-items-center" href="/">
       <img src="/images/logo-black.svg" alt="Pethudl" height="40" />
-      <span class="fw-bold ms-2">Pethudl</span>
+      <span class="fw-bold ms-2 d-none d-sm-inline">Pethudl</span>
     </a>
+
+    <!-- Contact Info (Desktop Only) -->
+    <div class="d-none d-md-flex align-items-center ms-3">
+      <a href="mailto:petwego747@gmail.com" class="text-decoration-none text-muted small fw-bold">
+        <i class="fas fa-envelope me-1"></i> petwego747@gmail.com
+      </a>
+    </div>
 
     <!-- Search bar (Facebook style) -->
     <% if (user) { %>
