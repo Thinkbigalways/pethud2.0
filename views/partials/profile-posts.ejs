@@ -220,36 +220,46 @@
           <script>
             document.addEventListener('DOMContentLoaded', () => {
 
-              // Like Button Handler
-              document.querySelectorAll('.like-btn').forEach(btn => {
-                btn.addEventListener('click', async () => {
-                  const card = btn.closest('[data-post-id]');
-                  const postId = card.dataset.postId;
+              // Like Button Handler (Event Delegation)
+              document.addEventListener('click', async (e) => {
+                const btn = e.target.closest('.like-btn');
+                if (!btn) return;
+                
+                e.preventDefault();
+                
+                const card = btn.closest('[data-post-id]');
+                if (!card) return;
+                
+                const postId = card.dataset.postId;
 
-                  try {
-                    const res = await fetch(`/posts/${postId}/like`, { method: 'POST' });
-                    const data = await res.json();
+                try {
+                  const res = await fetch(`/posts/${postId}/like`, { method: 'POST' });
+                  const data = await res.json();
 
-                    if (data.success) {
-                      const countEl = card.querySelector('.likes-count');
-                      let currentLikes = parseInt(countEl.textContent) || 0;
+                  if (data.success) {
+                    const countEl = card.querySelector('.likes-count');
+                    let currentLikes = 0;
+                    if (countEl && countEl.textContent) {
+                       currentLikes = parseInt(countEl.textContent) || 0;
+                    }
 
-                      if (data.liked) {
-                        currentLikes++;
-                        btn.querySelector('i').classList.remove('far');
-                        btn.querySelector('i').classList.add('fas', 'text-primary');
-                      } else {
-                        currentLikes--;
-                        btn.querySelector('i').classList.remove('fas', 'text-primary');
-                        btn.querySelector('i').classList.add('far');
-                      }
+                    if (data.liked) {
+                      currentLikes++;
+                      btn.querySelector('i').classList.remove('far');
+                      btn.querySelector('i').classList.add('fas', 'text-primary');
+                    } else {
+                      currentLikes = Math.max(0, currentLikes - 1);
+                      btn.querySelector('i').classList.remove('fas', 'text-primary');
+                      btn.querySelector('i').classList.add('far');
+                    }
 
+                    if (countEl) {
                       countEl.textContent = currentLikes > 0 ? `${currentLikes} Likes` : '';
                     }
-                  } catch (err) {
-                    console.error('Error liking post:', err);
                   }
-                });
+                } catch (err) {
+                  console.error('Error liking post:', err);
+                }
               });
 
               // Load Comments Function
