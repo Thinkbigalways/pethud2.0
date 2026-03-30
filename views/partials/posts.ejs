@@ -238,7 +238,7 @@
               // LIKE BUTTON (Using event delegation for dynamically loaded posts)
               document.addEventListener('click', async (e) => {
                 const btn = e.target.closest('.like-btn');
-                if (!btn) return;
+                if (!btn || btn.disabled) return;
                 
                 // Prevent default form/link behavior if any
                 e.preventDefault();
@@ -247,34 +247,29 @@
                 if (!card) return;
                 
                 const postId = card.dataset.postId;
+                btn.disabled = true;
                 try {
                   const res = await fetch(`/posts/${postId}/like`, { method: 'POST' });
                   const data = await res.json();
                   if (data.success) {
-                    // Update like count text
                     const countEl = card.querySelector('.likes-count');
-                    let currentLikes = 0;
-                    if (countEl && countEl.textContent) {
-                       currentLikes = parseInt(countEl.textContent) || 0;
-                    }
+                    const likeCount = data.likeCount || 0;
                     
                     if (data.liked) {
-                      currentLikes++;
-                      // make solid
                       btn.querySelector('i').classList.remove('far');
                       btn.querySelector('i').classList.add('fas', 'text-primary');
                     } else {
-                      currentLikes = Math.max(0, currentLikes - 1);
-                      // revert back to outline
                       btn.querySelector('i').classList.remove('fas', 'text-primary');
                       btn.querySelector('i').classList.add('far');
                     }
                     if (countEl) {
-                      countEl.textContent = currentLikes > 0 ? `${currentLikes} Likes` : '';
+                      countEl.textContent = likeCount > 0 ? `${likeCount} Likes` : '';
                     }
                   }
                 } catch (err) {
                   console.error('Error liking post:', err);
+                } finally {
+                  btn.disabled = false;
                 }
               });
 

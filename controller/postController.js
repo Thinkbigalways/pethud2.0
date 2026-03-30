@@ -290,7 +290,11 @@ async function likePost(req, res) {
       });
     }
 
-    return res.json({ success: true, liked: !isLiked });
+    // Re-read the post to get the actual like count
+    const updatedDoc = await postRef.get();
+    const updatedLikes = updatedDoc.data().likes || [];
+
+    return res.json({ success: true, liked: !isLiked, likeCount: updatedLikes.length });
   } catch (err) {
     console.error('Error liking post:', err);
     return res.json({ success: false, message: 'Failed to like post' });
@@ -623,6 +627,8 @@ async function getFeedPosts(req, res) {
         // Add counts
         commentCount: Array.isArray(data.comments) ? data.comments.length : 0,
         likeCount: Array.isArray(data.likes) ? data.likes.length : 0,
+        // Check if current user liked it
+        is_liked: req.user && Array.isArray(data.likes) && data.likes.includes(req.user.id),
         // Ensure likes/comments arrays exist so frontend doesn't crash
         likes: data.likes || [],
         comments: data.comments || []

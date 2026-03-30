@@ -31,6 +31,8 @@ async function showHome(req, res, next) {
           commentCount: Array.isArray(data.comments) ? data.comments.length : 0,
           // Ensure likes is an array for count
           likeCount: Array.isArray(data.likes) ? data.likes.length : 0,
+          // Check if current user liked it
+          is_liked: user && Array.isArray(data.likes) && data.likes.includes(user.id),
         };
       });
     } catch (err) {

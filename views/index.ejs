@@ -527,7 +527,7 @@
           const userLoggedIn = window.__userLoggedIn || false;
 
           const likeBtn = userLoggedIn
-            ? `<button class="btn btn-light btn-sm like-btn flex-fill" data-post-id="${post.id}"><i class="far fa-thumbs-up me-2"></i>Like</button>`
+            ? `<button class="btn btn-light btn-sm like-btn flex-fill" data-post-id="${post.id}"><i class="${post.is_liked ? 'fas text-primary' : 'far'} fa-thumbs-up me-2"></i>Like</button>`
             : `<a href="/auth/login" class="btn btn-light btn-sm flex-fill text-decoration-none text-dark"><i class="far fa-thumbs-up me-2"></i>Like</a>`;
 
           const commentBtn = `<a href="/posts/view-post/${post.id}" class="btn btn-light btn-sm flex-fill text-decoration-none text-dark"><i class="far fa-comment me-2"></i>Comment</a>`;
@@ -556,7 +556,7 @@
                 <p>${content}</p>
                 ${mediaHtml}
                 <div class="d-flex justify-content-between align-items-center mt-2 border-top border-bottom pt-2 pb-2">
-                  <span class="text-muted small">${likeCount > 0 ? likeCount + ' Likes' : ''}</span>
+                  <span class="text-muted small likes-count">${likeCount > 0 ? likeCount + ' Likes' : ''}</span>
                   <span class="text-muted small">${commentCount} Comments</span>
                 </div>
                 <div class="d-flex justify-content-between gap-2 mt-3">

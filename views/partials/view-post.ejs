@@ -427,20 +427,17 @@
                 const data = await res.json();
                 if (data.success) {
                   const countEl = postEl.querySelector('.likes-count');
-                  const m = countEl.textContent.match(/(\d+)/);
-                  let current = m ? parseInt(m[1], 10) : 0;
+                  const likeCount = data.likeCount || 0;
                   if (data.liked) {
-                    current++;
                     const i = btn.querySelector('i');
                     i.classList.remove('far');
                     i.classList.add('fas', 'text-primary');
                   } else {
-                    current = Math.max(0, current - 1);
                     const i = btn.querySelector('i');
                     i.classList.remove('fas', 'text-primary');
                     i.classList.add('far');
                   }
-                  updateLikesText(postEl, current);
+                  updateLikesText(postEl, likeCount);
                 } else {
                   alert(data.message || 'Failed to like/unlike');
                 }
